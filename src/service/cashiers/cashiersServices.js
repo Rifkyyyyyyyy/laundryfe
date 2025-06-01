@@ -25,6 +25,30 @@ const getAllCashiers = async (page, limit) => {
 };
 
 
+const deleteCashiers = async (id) => {
+    try {
+      const response = await Client.delete('/users/' + id);
+  
+   
+  
+      // Karena response.data.data biasanya kosong/null di delete, cukup cek status dan success flag
+      if (response.status === 200 && response.data.status === true) {
+        return true;  // atau return sesuatu yang meyakinkan kalau delete berhasil
+      }
+  
+      throw new Error(response.data.message || 'Gagal menghapus kasir');
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.message ||
+        error.message ||
+        'Terjadi kesalahan saat menghapus kasir'
+      );
+    }
+  };
+
+  
+
 export default {
-    getAllCashiers
+    getAllCashiers ,
+    deleteCashiers
 }

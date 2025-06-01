@@ -47,10 +47,10 @@ export default function PopularCard({ isLoading }) {
               <Grid size={12}>
                 <Grid container sx={{ alignContent: 'center', justifyContent: 'space-between' }}>
                   <Grid>
-                    <Typography variant="h4">Popular Stocks</Typography>
+                    <Typography variant="h4">Produk Laundry Terlaris</Typography>
                   </Grid>
                   <Grid>
-                    <IconButton size="small" sx={{ mt: -0.625 }}>
+                    <IconButton size="small" sx={{ mt: -0.625 }} onClick={handleClick}>
                       <MoreHorizOutlinedIcon
                         fontSize="small"
                         sx={{ cursor: 'pointer' }}
@@ -68,9 +68,9 @@ export default function PopularCard({ isLoading }) {
                       anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                       transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                     >
-                      <MenuItem onClick={handleClose}> Today</MenuItem>
-                      <MenuItem onClick={handleClose}> This Month</MenuItem>
-                      <MenuItem onClick={handleClose}> This Year </MenuItem>
+                      <MenuItem onClick={handleClose}>Hari Ini</MenuItem>
+                      <MenuItem onClick={handleClose}>Bulan Ini</MenuItem>
+                      <MenuItem onClick={handleClose}>Tahun Ini</MenuItem>
                     </Menu>
                   </Grid>
                 </Grid>
@@ -78,217 +78,67 @@ export default function PopularCard({ isLoading }) {
               <Grid size={12} sx={{ mt: -1 }}>
                 <BajajAreaChartCard />
               </Grid>
-              <Grid size={12}>
-                <Grid container direction="column">
-                  <Grid>
-                    <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-                      <Grid>
-                        <Typography variant="subtitle1" color="inherit">
-                          Bajaj Finery
-                        </Typography>
-                      </Grid>
-                      <Grid>
-                        <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-                          <Grid>
-                            <Typography variant="subtitle1" color="inherit">
-                              $1839.00
-                            </Typography>
-                          </Grid>
-                          <Grid>
-                            <Avatar
-                              variant="rounded"
-                              sx={{
-                                width: 16,
-                                height: 16,
-                                borderRadius: '5px',
-                                bgcolor: 'success.light',
-                                color: 'success.dark',
-                                ml: 2
-                              }}
-                            >
-                              <KeyboardArrowUpOutlinedIcon fontSize="small" color="inherit" />
-                            </Avatar>
+
+              {/* Daftar Produk Laundry */}
+              {[
+                { name: 'Cuci Kering Biasa', price: 15000, status: 'Naik', color: 'success' },
+                { name: 'Cuci Setrika Express', price: 25000, status: 'Turun', color: 'orange' },
+                { name: 'Setrika Saja', price: 12000, status: 'Naik', color: 'success' },
+                { name: 'Cuci Bed Cover', price: 35000, status: 'Turun', color: 'orange' },
+                { name: 'Dry Clean Jas', price: 50000, status: 'Turun', color: 'orange' }
+              ].map((item, index) => (
+                <React.Fragment key={index}>
+                  <Grid container direction="column">
+                    <Grid>
+                      <Grid container alignItems="center" justifyContent="space-between" spacing={2}>
+                        <Grid item xs>
+                          <Typography variant="subtitle1" color="inherit">
+                            {item.name}
+                          </Typography>
+                        </Grid>
+                        <Grid item>
+                          <Grid container alignItems="center" spacing={1}>
+                            <Grid item>
+                              <Typography variant="subtitle1" color="inherit">
+                                Rp{item.price.toLocaleString('id-ID')}
+                              </Typography>
+                            </Grid>
+                            <Grid item>
+                              <Avatar
+                                variant="rounded"
+                                sx={{
+                                  width: 16,
+                                  height: 16,
+                                  borderRadius: '5px',
+                                  bgcolor: `${item.color}.light`,
+                                  color: `${item.color}.dark`
+                                }}
+                              >
+                                {item.status === 'Naik' ? (
+                                  <KeyboardArrowUpOutlinedIcon fontSize="small" color="inherit" />
+                                ) : (
+                                  <KeyboardArrowDownOutlinedIcon fontSize="small" color="inherit" />
+                                )}
+                              </Avatar>
+                            </Grid>
                           </Grid>
                         </Grid>
                       </Grid>
                     </Grid>
-                  </Grid>
-                  <Grid>
-                    <Typography variant="subtitle2" sx={{ color: 'success.dark' }}>
-                      10% Profit
-                    </Typography>
-                  </Grid>
-                </Grid>
-                <Divider sx={{ my: 1.5 }} />
-                <Grid container direction="column">
-                  <Grid>
-                    <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-                      <Grid>
-                        <Typography variant="subtitle1" color="inherit">
-                          TTML
-                        </Typography>
-                      </Grid>
-                      <Grid>
-                        <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-                          <Grid>
-                            <Typography variant="subtitle1" color="inherit">
-                              $100.00
-                            </Typography>
-                          </Grid>
-                          <Grid>
-                            <Avatar
-                              variant="rounded"
-                              sx={{
-                                width: 16,
-                                height: 16,
-                                borderRadius: '5px',
-                                bgcolor: 'orange.light',
-                                color: 'orange.dark',
-                                marginLeft: 1.875
-                              }}
-                            >
-                              <KeyboardArrowDownOutlinedIcon fontSize="small" color="inherit" />
-                            </Avatar>
-                          </Grid>
-                        </Grid>
-                      </Grid>
+                    <Grid>
+                      <Typography variant="subtitle2" sx={{ color: `${item.color}.dark` }}>
+                        {item.status === 'Naik' ? 'Penjualan Naik' : 'Penjualan Turun'}
+                      </Typography>
                     </Grid>
                   </Grid>
-                  <Grid>
-                    <Typography variant="subtitle2" sx={{ color: 'orange.dark' }}>
-                      10% loss
-                    </Typography>
-                  </Grid>
-                </Grid>
-                <Divider sx={{ my: 1.5 }} />
-                <Grid container direction="column">
-                  <Grid>
-                    <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-                      <Grid>
-                        <Typography variant="subtitle1" color="inherit">
-                          Reliance
-                        </Typography>
-                      </Grid>
-                      <Grid>
-                        <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-                          <Grid>
-                            <Typography variant="subtitle1" color="inherit">
-                              $200.00
-                            </Typography>
-                          </Grid>
-                          <Grid>
-                            <Avatar
-                              variant="rounded"
-                              sx={{
-                                width: 16,
-                                height: 16,
-                                borderRadius: '5px',
-                                bgcolor: 'success.light',
-                                color: 'success.dark',
-                                ml: 2
-                              }}
-                            >
-                              <KeyboardArrowUpOutlinedIcon fontSize="small" color="inherit" />
-                            </Avatar>
-                          </Grid>
-                        </Grid>
-                      </Grid>
-                    </Grid>
-                  </Grid>
-                  <Grid>
-                    <Typography variant="subtitle2" sx={{ color: 'success.dark' }}>
-                      10% Profit
-                    </Typography>
-                  </Grid>
-                </Grid>
-                <Divider sx={{ my: 1.5 }} />
-                <Grid container direction="column">
-                  <Grid>
-                    <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-                      <Grid>
-                        <Typography variant="subtitle1" color="inherit">
-                          TTML
-                        </Typography>
-                      </Grid>
-                      <Grid>
-                        <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-                          <Grid>
-                            <Typography variant="subtitle1" color="inherit">
-                              $189.00
-                            </Typography>
-                          </Grid>
-                          <Grid>
-                            <Avatar
-                              variant="rounded"
-                              sx={{
-                                width: 16,
-                                height: 16,
-                                borderRadius: '5px',
-                                bgcolor: 'orange.light',
-                                color: 'orange.dark',
-                                ml: 2
-                              }}
-                            >
-                              <KeyboardArrowDownOutlinedIcon fontSize="small" color="inherit" />
-                            </Avatar>
-                          </Grid>
-                        </Grid>
-                      </Grid>
-                    </Grid>
-                  </Grid>
-                  <Grid>
-                    <Typography variant="subtitle2" sx={{ color: 'orange.dark' }}>
-                      10% loss
-                    </Typography>
-                  </Grid>
-                </Grid>
-                <Divider sx={{ my: 1.5 }} />
-                <Grid container direction="column">
-                  <Grid>
-                    <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-                      <Grid>
-                        <Typography variant="subtitle1" color="inherit">
-                          Stolon
-                        </Typography>
-                      </Grid>
-                      <Grid>
-                        <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-                          <Grid>
-                            <Typography variant="subtitle1" color="inherit">
-                              $189.00
-                            </Typography>
-                          </Grid>
-                          <Grid>
-                            <Avatar
-                              variant="rounded"
-                              sx={{
-                                width: 16,
-                                height: 16,
-                                borderRadius: '5px',
-                                bgcolor: 'orange.light',
-                                color: 'orange.dark',
-                                ml: 2
-                              }}
-                            >
-                              <KeyboardArrowDownOutlinedIcon fontSize="small" color="inherit" />
-                            </Avatar>
-                          </Grid>
-                        </Grid>
-                      </Grid>
-                    </Grid>
-                  </Grid>
-                  <Grid>
-                    <Typography variant="subtitle2" sx={{ color: 'orange.dark' }}>
-                      10% loss
-                    </Typography>
-                  </Grid>
-                </Grid>
-              </Grid>
+                  <Divider sx={{ my: 1.5 }} />
+                </React.Fragment>
+              ))}
             </Grid>
           </CardContent>
           <CardActions sx={{ p: 1.25, pt: 0, justifyContent: 'center' }}>
             <Button size="small" disableElevation>
-              View All
+              Lihat Semua
               <ChevronRightOutlinedIcon />
             </Button>
           </CardActions>

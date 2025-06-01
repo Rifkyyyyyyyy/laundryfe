@@ -13,7 +13,7 @@ const OrderView = Loadable(lazy(() => import('../views/business/orders/OrdersVie
 const PaymentView = Loadable(lazy(() => import('../views/business/PaymentViews')));
 const ServicesView = Loadable(lazy(() => import('../views/products/ServicesView')));
 const MemberViews = Loadable(lazy(() => import('../views/hr/Member')));
-const CashiersViews = Loadable(lazy(() => import('../views/hr/Cashiers')));
+const CashiersViews = Loadable(lazy(() => import('../views/hr/cashiers/Cashiers')));
 const CustomersViews = Loadable(lazy(() => import('../views/hr/Customers')));
 const SamplePage = Loadable(lazy(() => import('../views/sample-page')));
 const TodoViews = Loadable(lazy(() => import('../views/business/TodoViews')));

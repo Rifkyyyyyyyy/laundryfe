@@ -44,20 +44,19 @@ export default function authReducer(state = initialState, action) {
         case REGISTER_SUCCESS:
             return {
                 ...state,
-                user: action.payload,
                 error: null,
-                isAuthenticated: false,
                 loading: false,
+                // Tidak mengubah user atau isAuthenticated
             };
 
         case LOGIN_FAILURE:
         case REGISTER_FAILURE:
             return {
                 ...state,
-                user: null,
+                // Jangan reset user di register failure agar login tetap aman
                 error: action.payload,
-                isAuthenticated: false,
                 loading: false,
+                // isAuthenticated tetap tidak berubah di register failure
             };
 
         case LOGOUT_SUCCESS:

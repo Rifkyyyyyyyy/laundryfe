@@ -33,7 +33,7 @@ import { getSimplyProductsByOutletThunk } from '../../../store/actions/popup';
 import TableSkeletonLoader from '../../../ui-component/cards/Skeleton/TableSkeletonLoader';
 import DatePicker from "react-datepicker";
 
-import "react-datepicker/dist/react-datepicker.css";
+
 import ProductDialog from './ProductDialog';
 import QuantityDialog from './QuanityDialog';
 import { PDFDownloadLink } from '@react-pdf/renderer';
@@ -52,8 +52,8 @@ export default function OrderView() {
   const outletId = user?.outlet?._id;
   const cashiers = user?.id;
   const orders = data?.orders || [];
-  const { popupData = [], popupLoading = false, popupError = null } = useSelector(
-    (state) => state.popup || {}
+  const productList = useSelector(
+    (state) => state.popup.popupData.products || {}
   );
 
   const totalPrice = useSelector((state) => state.calculate.total ?? 0);
@@ -82,6 +82,9 @@ export default function OrderView() {
   const totalPages = data?.pagination?.totalPages || 1;
 
 
+  console.log(JSON.stringify(productList));
+
+
   useEffect(() => {
     if (!hasFetching) {
       dispatch(fetchOrderByOutletId(currentPage, itemsPerPage, outletId));
@@ -90,6 +93,7 @@ export default function OrderView() {
 
   useEffect(() => {
     if (outletId) {
+      console.log('cihuy');
       dispatch(getSimplyProductsByOutletThunk(outletId));
     }
   }, [dispatch, outletId]);
@@ -190,9 +194,9 @@ export default function OrderView() {
     setCurrentPage(page);
 
     if (searchTerm.trim() !== '') {
-   
+
     } else {
-      
+
     }
   };
 
@@ -239,7 +243,7 @@ export default function OrderView() {
                 <FilterList />
               </IconButton>
 
-              <IconButton size="small" onClick={handleOpenAddOrder}>
+              <IconButton size="small" onClick={handleOpenAddOrder} disabled={user.role === 'owner'}>
                 <Add />
               </IconButton>
             </Box>
@@ -264,7 +268,7 @@ export default function OrderView() {
 
             <TableBody>
               {loading ? (
-                <TableSkeletonLoader cols={9} rows={5}/>
+                <TableSkeletonLoader cols={9} rows={5} />
               ) : orders.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} align="center">
@@ -332,14 +336,14 @@ export default function OrderView() {
               color="primary"
               disabled={loading}
               sx={{
-                  '& .MuiPaginationItem-root': {
-                      borderRadius: '4px',
-                      margin: '0 2px',
-                  },
-                  '& .MuiPaginationItem-root:not(.Mui-selected):not(.MuiPaginationItem-previousNext)': {
-                      border: '1px solid',
-                      borderColor: 'primary.main',
-                  },
+                '& .MuiPaginationItem-root': {
+                  borderRadius: '4px',
+                  margin: '0 2px',
+                },
+                '& .MuiPaginationItem-root:not(.Mui-selected):not(.MuiPaginationItem-previousNext)': {
+                  border: '1px solid',
+                  borderColor: 'primary.main',
+                },
               }}
             />
           </Box>
@@ -449,7 +453,7 @@ export default function OrderView() {
               </Typography>
             ) : (
               selectedProducts.map((p) => {
-                const prod = popupData.find((prod) => prod._id === p.id);
+                const prod = productList.find((prod) => prod._id === p.id);
                 return (
                   <Chip
                     key={p.id}
@@ -485,7 +489,7 @@ export default function OrderView() {
       <ProductDialog
         open={openProductDialog}
         onClose={handleCloseProductDialog}
-        products={popupData}
+        products={productList}
         selectedProducts={selectedProducts}
         onSelectProduct={(product) => {
           handleSelectProduct(product);

@@ -50,8 +50,8 @@ export default function ProductViews() {
     const { data = {}, hasFetching = false, loading = false, error = null } = useSelector(
         (state) => state.products || {}
     );
-    const { popupData = [], popupLoading = false, popupError = null } = useSelector(
-        (state) => state.popup || {}
+    const productService = useSelector(
+        (state) => state.popup.popupData.service || {}
     );
 
 
@@ -246,7 +246,7 @@ export default function ProductViews() {
                                 </IconButton>
                             </Tooltip>
                             <Tooltip title="Add Product">
-                                <IconButton onClick={handleOpenAddDialog}>
+                                <IconButton onClick={handleOpenAddDialog} disabled={user.role === 'owner'}>
                                     <Add />
                                 </IconButton>
                             </Tooltip>
@@ -446,7 +446,7 @@ export default function ProductViews() {
                                 <MenuItem value="">
                                     <em>None</em>
                                 </MenuItem>
-                                {popupData?.map((category) => (
+                                {productService?.map((category) => (
                                     <MenuItem key={category._id} value={category._id}>
                                         {category.name}
                                     </MenuItem>

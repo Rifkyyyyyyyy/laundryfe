@@ -33,6 +33,7 @@ import '@fontsource/poppins/700.css';
 
 import 'leaflet/dist/leaflet.css';
 
+import "react-datepicker/dist/react-datepicker.css";
 
 // redux store
 const store = configureStore({

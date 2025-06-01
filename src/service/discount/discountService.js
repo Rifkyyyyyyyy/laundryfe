@@ -17,9 +17,11 @@ const getAllDiscountService = async (page, limit) => {
     }
 }
 
-const getAllDiscountByOutletService = async (outletId , page , limit) => {
+const getAllDiscountByOutletService = async (page , limit , outletId ) => {
     try {
-        const response = await Client.get('/discount/by-outlet/' + outletId);
+        const response = await Client.get('/discount/by-outlet/' + outletId , {
+            params : {page , limit}
+        });
         if (response.status === 200 && response.data.status && response.data.data) {
             return response.data.data;
         }
@@ -32,32 +34,15 @@ const getAllDiscountByOutletService = async (outletId , page , limit) => {
     }
 }
 
-const createDiscountService = async (
-    outletId,
-    code,
-    discountAmount,
-    validFrom,
-    validUntil,
-    statusDiscount,
-    applicableProductIds,
-    maxUsage
-) => {
+const createDiscountService = async (data) => {
     try {
-        const response = await Client.post('/discount', {
-            outletId,
-            code,
-            discountAmount,
-            validFrom,
-            validUntil,
-            status: statusDiscount,
-            applicableProductIds,
-            maxUsage
-        });
+        const response = await Client.post('/discount', data);
 
         if (response.status === 201 && response.data.status && response.data.data) {
             return response.data.data;
         }
     } catch (error) {
+        console.log(`error : ${error}`);
         throw new Error(
             error.response?.data?.message ||
             error.message ||

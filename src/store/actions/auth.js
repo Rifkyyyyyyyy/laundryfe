@@ -15,6 +15,7 @@ export const LOGOUT_SUCCESS = "LOGOUT_SUCCESS";
 
 export const REGISTER_SUCCESS = "REGISTER_SUCCESS";
 export const REGISTER_FAILURE = "REGISTER_FAILURE";
+export const REGISTER_LOADING = "REGISTER_LOADING";
 
 
 // Action creators
@@ -45,18 +46,26 @@ export function logoutRequest() {
     };
 }
 
+
 export function receiveLogout() {
     return {
         type: LOGOUT_SUCCESS,
     };
 }
 
-export function registerSuccess(user) {
+export function registerSuccess() {
     return {
         type: REGISTER_SUCCESS,
-        payload: user,
     };
 }
+
+export function registerLoading() {
+    return {
+        type: REGISTER_LOADING,
+    };
+}
+
+
 
 export function registerFailure(error) {
     return {
@@ -89,6 +98,26 @@ export function loginUser(email, password) {
     };
 }
 
+
+
+export function userRegisters(data) {
+    return async (dispatch) => {
+        dispatch(registerLoading()) 
+
+        const delayPromise = new Promise(resolve => setTimeout(resolve, 1500));
+        const responsePromise = registerCashiers(data);
+
+        try {
+            const [response] = await Promise.all([responsePromise, delayPromise]);
+
+            dispatch(registerSuccess(response));
+          
+        } catch (error) {
+            await delayPromise; // pastikan delay tetap terpenuhi
+            dispatch(registerFailure(error.message || 'Terjadi kesalahan saat registrasi'));
+        }
+    };
+}
 
 
 export function logoutUser() {

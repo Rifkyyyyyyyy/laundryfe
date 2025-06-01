@@ -44,6 +44,29 @@ const getSimplyProductsByOutlet = async (outletId) => {
     }
 };
 
+const getSimplyProducts = async () => {
+    try {
+        const response = await Client.get(`/product/all`);
+
+        console.log(`data dari api : ${response.data}`);
+
+        if (response.status === 200 && response.data.status && response.data.data) {
+            return response.data.data;
+        }
+
+        throw new Error('Data produk tidak ditemukan');
+    } catch (error) {
+        throw new Error(
+            error.response?.data?.message ||
+            error.message ||
+
+            'Terjadi kesalahan saat ambil data produk'
+        );
+    }
+};
+
+
+
 
 
 const getAllProducts = async (page, limit) => {
@@ -140,5 +163,6 @@ export default {
     updateProducts,
     createProducts,
     getAllProducts,
-    getSimplyProductsByOutlet
+    getSimplyProductsByOutlet ,
+    getSimplyProducts
 };

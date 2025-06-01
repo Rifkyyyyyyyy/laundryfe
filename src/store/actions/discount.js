@@ -13,9 +13,6 @@ export const FETCH_DISCOUNTS_REQUEST = 'FETCH_DISCOUNTS_REQUEST';
 export const FETCH_DISCOUNTS_SUCCESS = 'FETCH_DISCOUNTS_SUCCESS';
 export const FETCH_DISCOUNTS_FAILURE = 'FETCH_DISCOUNTS_FAILURE';
 
-export const FETCH_DISCOUNTS_BY_OUTLET_REQUEST = 'FETCH_DISCOUNTS_BY_OUTLET_REQUEST';
-export const FETCH_DISCOUNTS_BY_OUTLET_SUCCESS = 'FETCH_DISCOUNTS_BY_OUTLET_SUCCESS';
-export const FETCH_DISCOUNTS_BY_OUTLET_FAILURE = 'FETCH_DISCOUNTS_BY_OUTLET_FAILURE';
 
 export const CREATE_DISCOUNT_REQUEST = 'CREATE_DISCOUNT_REQUEST';
 export const CREATE_DISCOUNT_SUCCESS = 'CREATE_DISCOUNT_SUCCESS';
@@ -45,21 +42,6 @@ export const fetchDiscountsFailure = (error) => ({
     error
 });
 
-// Fetch By Outlet
-export const fetchDiscountsByOutletRequest = (outletId) => ({
-    type: FETCH_DISCOUNTS_BY_OUTLET_REQUEST,
-    outletId
-});
-
-export const fetchDiscountsByOutletSuccess = (payload) => ({
-    type: FETCH_DISCOUNTS_BY_OUTLET_SUCCESS,
-    payload
-});
-
-export const fetchDiscountsByOutletFailure = (error) => ({
-    type: FETCH_DISCOUNTS_BY_OUTLET_FAILURE,
-    error
-});
 
 // Create
 export const createDiscountRequest = (data) => ({
@@ -123,3 +105,35 @@ export const fetchAllDiscounts = () => {
         }
     };
 };
+
+
+export const fetchAllDiscountsByOutlets = (page, limit, outletId) => {
+    return async (dispatch) => {
+        dispatch(fetchDiscountsRequest());
+        try {
+            const data = await getAllDiscountByOutletService(page, limit, outletId);
+            console.log(`data dari api : ${JSON.stringify(data)}`);
+            dispatch(fetchDiscountsSuccess(data));
+        } catch (error) {
+            dispatch(fetchDiscountsFailure(error.message || "Gagal mengambil data diskon"));
+        }
+    };
+};
+
+
+
+export const createDiscounts = (value) => {
+    return async (dispatch) => {
+        dispatch(createDiscountRequest());
+        try {
+            const data = await createDiscountService(value)
+            console.log(`data dari api : ${JSON.stringify(data)}`);
+            dispatch(createDiscountSuccess(data));
+        } catch (error) {
+            console.log(`error : ${error}`);
+            dispatch(createDiscountFailure(error.message || "Gagal mengambil data diskon"));
+        }
+    };
+};
+
+

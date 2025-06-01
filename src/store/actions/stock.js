@@ -1,7 +1,8 @@
 import stockService from "../../service/stock/stockService";
 
 const {
-    getStockByOutlet
+    getStockByOutlet ,
+    getAllStock
 } = stockService
 
 export const GET_STOCK_SUCCESS = "GET_STOCK_SUCCESS";
@@ -32,11 +33,27 @@ export function failedData(error) {
 
 
 
-export function getAllStock(page, limit, outletId) {
+export function getAllStockByOutlet(page, limit, outletId) {
     return async (dispatch) => {
         dispatch(loadingData());
         try {
             const data = await getStockByOutlet(page, limit, outletId);
+
+            // Tambahkan delay 500ms
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            dispatch(receiveData(data));
+        } catch (error) {
+            dispatch(failedData(error.message || "Gagal mengambil data inventory"));
+        }
+    }
+}
+
+export function getStock(page, limit) {
+    return async (dispatch) => {
+        dispatch(loadingData());
+        try {
+            const data = await getAllStock(page , limit)
 
             // Tambahkan delay 500ms
             await new Promise(resolve => setTimeout(resolve, 500));

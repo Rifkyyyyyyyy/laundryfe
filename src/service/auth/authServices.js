@@ -28,6 +28,7 @@ const registerCashiers = async (data) => {
       return response.data.data;
     }
   } catch (error) {
+    console.log(`error : ${error}`)
     throw new Error(error.response?.data?.message || error.message || 'Terjadi kesalahan saat membuat kasir');
   }
 }

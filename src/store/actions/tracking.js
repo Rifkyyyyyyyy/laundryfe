@@ -1,13 +1,37 @@
 import trackingService from "../../service/tracking/trackingService";
 
 const {
-    getTrackingByOutlet
+    getTrackingByOutlet,
+    updateTracking
 } = trackingService;
 
 export const GET_TRACKING_SUCCESS = "GET_TRACKING_SUCCESS";
 export const GET_TRACKING_LOADING = "GET_TRACKING_LOADING";
 export const GET_TRACKING_FAILURE = "GET_TRACKING_FAILURE";
 
+export const UPDATE_TRACKING_SUCCESS = "UPDATE_TRACKING_SUCCESS";
+export const UPDATE_TRACKING_LOADING = "UPDATE_TRACKING_LOADING";
+export const UPDATE_TRACKING_FAILURE = "UPDATE_TRACKING_FAILURE";
+
+export function updateTrackingSuccess(message) {
+    return {
+        type: UPDATE_TRACKING_SUCCESS,
+        message,
+    };
+}
+
+export function updateTrackingLoading() {
+    return {
+        type: UPDATE_TRACKING_LOADING,
+    };
+}
+
+export function updateTrackingFailure(error) {
+    return {
+        type: UPDATE_TRACKING_FAILURE,
+        error,
+    };
+}
 
 
 export function receiveData(payload) {
@@ -47,4 +71,18 @@ export function getAllTracking(page, limit, outletId) {
             dispatch(failedData(error.message || "Gagal mengambil data tracking"));
         }
     }
+}
+
+
+
+export function updateTrackingById(trackingId, status) {
+    return async (dispatch) => {
+        dispatch(updateTrackingLoading());
+        try {
+            const message = await updateTracking(trackingId, status);
+            dispatch(updateTrackingSuccess(message));
+        } catch (error) {
+            dispatch(updateTrackingFailure(error.message || "Gagal memperbarui status tracking"));
+        }
+    };
 }

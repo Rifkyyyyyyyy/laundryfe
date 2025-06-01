@@ -29,6 +29,31 @@ const getTrackingByOutlet = async (page, limit, outletId) => {
 
 
 
+const updateTracking = async (id, status) => {
+    try {
+        const response = await Client.put(`/tracking/${id}`, { status });
+        console.log("Calling updateTracking with id:", id, "status:", status);
+
+  
+      if (response.status === 200 && response.data.status) {
+        return response.data.message;  // atau data lainnya sesuai response dari backend
+      }
+  
+      console.warn("Unexpected response structure:", response.data);
+      return null;
+    } catch (error) {
+      console.error("Update Tracking API error:", error);
+      throw new Error(
+        error.response?.data?.message ||
+        error.message ||
+        'Gagal memperbarui status tracking'
+      );
+    }
+  };
+
+  
+
 export default {
-    getTrackingByOutlet
+    getTrackingByOutlet ,
+    updateTracking
 }

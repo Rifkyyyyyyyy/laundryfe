@@ -76,7 +76,7 @@ export default function PaymentView() {
                                         <TableCell>Rp {payment.amountPaid.toLocaleString()}</TableCell>
                                         <TableCell>{new Date(payment.paidAt).toLocaleString()}</TableCell>
 
-                                        <TableCell>{payment.processedBy?.username}</TableCell>
+                                        <TableCell>{payment.processedBy?.username ?? 'online'}</TableCell>
                                         <TableCell>{payment.paymentStatus}</TableCell>
                                     </TableRow>
                                 ))}

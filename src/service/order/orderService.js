@@ -25,6 +25,31 @@ const getOrderByOutletService = async (page, limit, outletId) => {
 }
 
 
+
+const getAllOrder = async (page, limit) => {
+    try {
+        const response = await Client.get('orders/outlet/' + outletId, {
+            params: {
+                page, limit
+            }
+        });
+
+        if (response.status === 200 && response.data.status && response.data.data) {
+            return response.data.data;
+        }
+
+    } catch (error) {
+        console.log(`err : ${error}`);
+        throw new Error(
+            error.response?.data?.message ||
+            error.message ||
+            'Terjadi kesalahan saat ambil data order'
+        );
+    }
+}
+
+
+
 const createOrderService = async ({
     processedBy,
     customerName,

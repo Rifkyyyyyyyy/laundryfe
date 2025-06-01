@@ -1,39 +1,60 @@
 import {
     GET_TRACKING_FAILURE,
     GET_TRACKING_LOADING,
-    GET_TRACKING_SUCCESS
+    GET_TRACKING_SUCCESS,
+    UPDATE_TRACKING_FAILURE,
+    UPDATE_TRACKING_LOADING,
+    UPDATE_TRACKING_SUCCESS
 } from '../actions/tracking';
 
 const initialState = {
-    trackingData: {},         // Berisi data hasil tracking
-    trackingLoading: false,   // Status loading
-    trackingError: null,      // Menyimpan error (jika ada)
-    trackingHasFetching: false // Flag untuk menandakan apakah data sudah pernah diambil
+    data: {},      // data utama, misal: { data: [ { _id, status, logs, ... }, ... ] }
+    loading: false,
+    error: null,
+    hasFetching: false
 };
 
 export default function tracking(state = initialState, action) {
     switch (action.type) {
         case GET_TRACKING_LOADING:
+        case UPDATE_TRACKING_LOADING:
             return {
                 ...state,
-                trackingLoading: true,
-                trackingError: null
+                loading: true,
+                error: null
             };
 
         case GET_TRACKING_SUCCESS:
             return {
                 ...state,
-                trackingLoading: false,
-                trackingData: action.payload,
-                trackingHasFetching: true
+                loading: false,
+                data: action.payload,
+                hasFetching: true
             };
 
-        case GET_TRACKING_FAILURE:
+        case UPDATE_TRACKING_SUCCESS: {
+            const updatedTracking = action.payload;  // { _id, status, logs, ... }
+            const updatedList = state.data?.data?.map(item =>
+                item._id === updatedTracking._id ? updatedTracking : item
+            ) || [updatedTracking];
+
             return {
                 ...state,
-                trackingLoading: false,
-                trackingError: action.error,
-                trackingHasFetching: false
+                loading: false,
+                data: {
+                    ...state.data,
+                    data: updatedList
+                }
+            };
+        }
+
+        case GET_TRACKING_FAILURE:
+        case UPDATE_TRACKING_FAILURE:
+            return {
+                ...state,
+                loading: false,
+                error: action.error,
+                hasFetching: false
             };
 
         default:
