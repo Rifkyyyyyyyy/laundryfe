@@ -32,21 +32,23 @@ export default function tracking(state = initialState, action) {
                 hasFetching: true
             };
 
-        case UPDATE_TRACKING_SUCCESS: {
-            const updatedTracking = action.payload;  // { _id, status, logs, ... }
-            const updatedList = state.data?.data?.map(item =>
-                item._id === updatedTracking._id ? updatedTracking : item
-            ) || [updatedTracking];
+            case UPDATE_TRACKING_SUCCESS: {
+                const updatedTracking = action.payload; // asumsi backend balikin tracking yang sudah update (dengan logs baru)
+                const newTrackingList = state.data.tracking.map(tracking =>
+                  tracking._id === updatedTracking._id ? updatedTracking : tracking
+                );
 
-            return {
-                ...state,
-                loading: false,
-                data: {
+              
+                return {
+                  ...state,
+                  loading: false,
+                  data: {
                     ...state.data,
-                    data: updatedList
-                }
-            };
-        }
+                    tracking: newTrackingList,
+                  },
+                };
+              }
+              
 
         case GET_TRACKING_FAILURE:
         case UPDATE_TRACKING_FAILURE:

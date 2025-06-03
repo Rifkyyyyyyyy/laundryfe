@@ -3,7 +3,8 @@ import memberService from "../../service/member/memberService";
 const {
     getMemberByOutletId,
     searchMemberByOutletId,
-    createMember
+    createMember,
+    getAllMember
 } = memberService;
 
 export const GET_MEMBER_SUCCESS = "GET_MEMBER_SUCCESS";
@@ -59,6 +60,20 @@ export function fetchMemberByOutletId(page, limit, outletId) {
     };
 }
 
+export function fetchAllMember(page, limit) {
+    return async (dispatch) => {
+        dispatch(loadingData());
+        try {
+            const data = await getAllMember(page, limit);
+            await new Promise(resolve => setTimeout(resolve, 500));
+            dispatch(receiveData(data));
+        } catch (error) {
+            dispatch(failedData(error.message || "Gagal mengambil data member"));
+        }
+    };
+}
+
+
 // Thunk for Searching Member
 export function searchMember(searchTerm, page, limit, outletId) {
     return async (dispatch) => {
@@ -76,14 +91,14 @@ export function searchMember(searchTerm, page, limit, outletId) {
 // Thunk for Creating Member
 export function onCreateMember(userId, outletId, membershipLevel, membershipDuration) {
     return async (dispatch) => {
-      dispatch(createMemberLoading());
-      try {
-        const data = await createMember(userId, outletId, membershipLevel, membershipDuration);
-        // delay supaya loading animasi keliatan
-        await new Promise(resolve => setTimeout(resolve, 300));
-        dispatch(createMemberSuccess(data));
-      } catch (error) {
-        dispatch(createMemberFailure(error.message || "Gagal membuat member"));
-      }
+        dispatch(createMemberLoading());
+        try {
+            const data = await createMember(userId, outletId, membershipLevel, membershipDuration);
+            // delay supaya loading animasi keliatan
+            await new Promise(resolve => setTimeout(resolve, 300));
+            dispatch(createMemberSuccess(data));
+        } catch (error) {
+            dispatch(createMemberFailure(error.message || "Gagal membuat member"));
+        }
     };
-  }
+}

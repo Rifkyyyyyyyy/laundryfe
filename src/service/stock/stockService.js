@@ -43,7 +43,45 @@ const getAllStock = async (page, limit) => {
 };
 
 
+const createStockService = async (data) => {
+    try {
+        const response = await Client.post('/stock' , data);
+        if(response.status === '201' && response.data.status  && response.data.data) {
+            return response.data.data;
+        }
+        throw new Error('Gagal menambahkan data inventory')
+    } catch (error) {
+        throw new Error(
+            error.response?.data?.message ||
+            error.message ||
+            'Terjadi kesalahan saat membuat data inventory'
+        );
+    }
+}
+ 
+
+const updateStockService = async (itemId , stock) => {
+    try {
+     
+        const response = await Client.patch('/stock/' + itemId, { jumlah: stock });
+        
+        if(response.status === 200 && response.data.status && response.data.data) {
+            return response.data.data;
+        }
+        throw new Error('Gagal mengupdate data inventory');
+    } catch (error) {
+        throw new Error(
+            error.response?.data?.message ||
+            error.message ||
+            'Terjadi kesalahan saat memgupdate data inventory'
+        );
+    }
+};
+
+
 export default  {
     getStockByOutlet ,
-    getAllStock
+    getAllStock ,
+    createStockService ,
+    updateStockService
 }

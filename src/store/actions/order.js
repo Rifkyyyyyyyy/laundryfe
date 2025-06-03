@@ -2,6 +2,7 @@ import orderService from "../../service/order/orderService";
 
 const {
   getOrderByOutletService,
+  getAllOrder ,
   createOrderService,
   calculateTotalOrderService,
 } = orderService;
@@ -50,6 +51,20 @@ export function fetchOrderByOutletId(page, limit, outletId) {
 
     try {
       const data = await getOrderByOutletService(page, limit, outletId);
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      dispatch(getOrderSuccess(data));
+    } catch (error) {
+      dispatch(getOrderFailure(error.message || "Gagal mengambil data order"));
+    }
+  };
+}
+
+export function fetchOrder(page, limit) {
+  return async (dispatch) => {
+    dispatch(getOrderLoading());
+
+    try {
+      const data = await getAllOrder(page, limit);
       await new Promise((resolve) => setTimeout(resolve, 500));
       dispatch(getOrderSuccess(data));
     } catch (error) {

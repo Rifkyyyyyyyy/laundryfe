@@ -87,16 +87,14 @@ export default function ProductViews() {
     const totalPages = data.pagination?.totalPages || 1;
 
     useEffect(() => {
-        if (user.role === 'owner') {
-            if (!hasFetching) {
+        if (!hasFetching) {
+            if (user.role === 'owner') {
                 dispatch(fetchAllProduct(page, limit));
-
-            }
-        } else if (user.role === 'kasir') {
-            if (!hasFetching) {
+            } else {
                 dispatch(fetchProductByOutletId(page, limit, outletId));
                 dispatch(getAllLaundryPopup());
             }
+
         }
 
     }, [dispatch, hasFetching, page, outletId]);

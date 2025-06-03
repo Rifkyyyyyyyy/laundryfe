@@ -27,7 +27,7 @@ import {
 import { Search, FilterList, Add, Close, Download } from '@mui/icons-material';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchOrderByOutletId, createOrder } from '../../../store/actions/order';
+import { fetchOrderByOutletId, createOrder, fetchOrder } from '../../../store/actions/order';
 import { calculateOrder } from '../../../store/actions/calculate';
 import { getSimplyProductsByOutletThunk } from '../../../store/actions/popup';
 import TableSkeletonLoader from '../../../ui-component/cards/Skeleton/TableSkeletonLoader';
@@ -87,13 +87,16 @@ export default function OrderView() {
 
   useEffect(() => {
     if (!hasFetching) {
-      dispatch(fetchOrderByOutletId(currentPage, itemsPerPage, outletId));
+      if (user.role != 'owner') {
+        dispatch(fetchOrderByOutletId(currentPage, itemsPerPage, outletId));
+      } else {
+        dispatch(fetchOrder(currentPage, itemsPerPage))
+      }
     }
   }, [dispatch, outletId, hasFetching]);
 
   useEffect(() => {
     if (outletId) {
-      console.log('cihuy');
       dispatch(getSimplyProductsByOutletThunk(outletId));
     }
   }, [dispatch, outletId]);
@@ -191,12 +194,16 @@ export default function OrderView() {
   };
 
   const handlePageChange = (event, page) => {
+
+
     setCurrentPage(page);
 
+    const action = user.role !== 'owner'
+      ? dispatch(fetchOrderByOutletId(currentPage, itemsPerPage, outletId))
+      : dispatch(fetchOrder(currentPage, itemsPerPage))
+
     if (searchTerm.trim() !== '') {
-
-    } else {
-
+      dispatch(action);
     }
   };
 

@@ -9,7 +9,6 @@ import {
   Paper,
   Grid,
   Avatar,
-  CircularProgress,
   Alert,
   Table,
   TableBody,
@@ -17,9 +16,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TablePagination,
   Button,
-  IconButton,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -28,44 +25,48 @@ import {
   InputLabel,
   MenuItem,
   DialogActions,
+  Pagination,
+  Card,
+  IconButton,
+  TextField,
+  InputAdornment,
+  Divider,
 } from "@mui/material";
 
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import DirectionsRunIcon from "@mui/icons-material/DirectionsRun";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { DeleteOutlineOutlined } from "@mui/icons-material";
-
+import TableSkeletonLoader from "../../ui-component/cards/Skeleton/TableSkeletonLoader";
+import { FilterList, Search } from "@mui/icons-material";
 
 export default function TodoViews() {
   const dispatch = useDispatch();
 
   const [page, setPage] = useState(1);
+  const itemsPerPage = 5;
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("");
   const [selectedTrackId, setSelectedTrackId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const user = JSON.parse(localStorage.getItem("user")) || {};
-  const outletId = user.outlet?._id;
-
-
+  const { user } = useSelector((state) => state.auth || {});
+  const outletId = user?.outlet?._id;
 
   const trackingData = useSelector((state) => state.tracking.data || {});
-
+  const trackingLoading = useSelector((state) => state.tracking.loading || false)
   const { data = {}, hasFetching = false, loading = false, error = null } =
     useSelector((state) => state.todo || {});
 
-
+  const totalPages = trackingData?.pagination?.totalPages || 1;
 
   useEffect(() => {
     if (!hasFetching && outletId) {
       dispatch(getAllTodo(outletId));
-      dispatch(getAllTracking(page, 5, outletId));
+      dispatch(getAllTracking(page, itemsPerPage, outletId));
     }
-  }, [hasFetching, dispatch, outletId]);
+  }, [hasFetching, dispatch, outletId, page]);
 
-
-
-  const handleChangePage = (event, newPage) => {
+  const handlePageChange = (event, newPage) => {
     setPage(newPage);
   };
 
@@ -113,9 +114,6 @@ export default function TodoViews() {
     setOpenEditDialog(true);
   };
 
-
-
-
   const handleStatusChange = (e) => {
     setSelectedStatus(e.target.value);
   };
@@ -127,29 +125,12 @@ export default function TodoViews() {
   };
 
   const handleSaveStatus = () => {
-    console.log("track id:", selectedTrackId );
-    console.log("status" , selectedStatus);
     dispatch(updateTrackingById(selectedTrackId, selectedStatus));
     handleCloseDialog();
   };
 
-  const userName = user?.username || "User";
-
   return (
-    <Box >
-
-      {loading && (
-        <Box sx={{ display: "flex", justifyContent: "center", my: 5 }}>
-          <CircularProgress size={48} />
-        </Box>
-      )}
-
-      {error && (
-        <Alert severity="error" sx={{ my: 3, fontWeight: "medium" }}>
-          {error}
-        </Alert>
-      )}
-
+    <>
       <Grid container spacing={3} sx={{ mt: 1 }}>
         {taskItems.map(({ label, value, icon, color, bgColor }) => (
           <Grid item xs={12} sm={6} md={3} key={label}>
@@ -190,19 +171,63 @@ export default function TodoViews() {
         ))}
       </Grid>
 
-      {/* Tracking Table */}
       <Box sx={{ mt: 5 }}>
+        {error && (
+          <Alert severity="error" sx={{ my: 3, fontWeight: "medium" }}>
+            {error}
+          </Alert>
+        )}
 
-     
-          <Paper elevation={4} sx={{ borderRadius: 3, overflowX: "auto" }}>
-            <TableContainer>
+
+        {trackingLoading ? (
+          <TableSkeletonLoader cols={7} row={5} />
+        ) : (
+          <Card>
+            <Box p={3}>
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                width="100%"
+                mb={3}
+              >
+                <Grid item>
+                  <Typography variant="h4" sx={{ fontWeight: 600 }}>
+                    Cashier Task List
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" mt={1}>
+                    Easily monitor customer order statuses. Search, filter, and update order progress as needed.
+                  </Typography>
+                </Grid>
+
+                <Box display="flex" alignItems="center" gap={1}>
+                  <TextField
+                    size="small"
+                    placeholder="Search by customer name"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Search />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+
+                  <IconButton size="small">
+                    <FilterList />
+                  </IconButton>
+
+
+                </Box>
+              </Box>
+
+              <Divider sx={{ mb: 2 }} />
+
               <Table>
                 <TableHead>
-                  <TableRow
-                    sx={{
-                      bgcolor: "primary.light",
-                    }}
-                  >
+                  <TableRow sx={{ bgcolor: "primary.light" }}>
                     <TableCell sx={{ fontWeight: "bold", color: "primary.dark" }}>
                       Order Code
                     </TableCell>
@@ -227,11 +252,7 @@ export default function TodoViews() {
                   {(trackingData?.tracking || []).map((track) => {
                     const lastLog = track.logs.at(-1);
                     return (
-                      <TableRow
-                        key={track._id}
-                        hover
-                        sx={{ cursor: "pointer" }}
-                      >
+                      <TableRow key={track._id} hover sx={{ cursor: "pointer" }}>
                         <TableCell>{track.orderId?.orderCode}</TableCell>
                         <TableCell>{track.orderId?.customerName}</TableCell>
                         <TableCell>{track.orderId?.customerPhone}</TableCell>
@@ -290,52 +311,57 @@ export default function TodoViews() {
                   )}
                 </TableBody>
               </Table>
-            </TableContainer>
-          </Paper>
-        
+              <Box display="flex" justifyContent="center" mt={2}>
+                <Pagination
+                  count={totalPages}
+                  page={page}
+                  onChange={handlePageChange}
+                  color="primary"
+                  disabled={loading}
+                  sx={{
+                    "& .MuiPaginationItem-root": {
+                      borderRadius: "4px",
+                      margin: "0 2px",
+                    },
+                    "& .MuiPaginationItem-root:not(.Mui-selected):not(.MuiPaginationItem-previousNext)":
+                    {
+                      border: "1px solid",
+                      borderColor: "primary.main",
+                    },
+                  }}
+                />
+              </Box>
+            </Box>
+          </Card>
+
+        )}
       </Box>
 
       {/* Edit Status Dialog */}
-      <Dialog open={openEditDialog} onClose={handleCloseDialog} fullWidth maxWidth="sm">
-        <DialogTitle sx={{ fontWeight: "bold", pb: 0 }}>Ubah Status Pesanan</DialogTitle>
-        <DialogContent dividers sx={{ pt: 2 }}>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Silakan pilih status baru untuk pesanan ini:
-          </Typography>
-
-          <FormControl fullWidth>
-            <InputLabel id="status-select-label">Status</InputLabel>
-            <Select
-              labelId="status-select-label"
-              value={selectedStatus}
-              label="Status"
-              onChange={handleStatusChange}
-              sx={{ minWidth: 120 }}
-            >
-              {statusOptions
-                .filter((status) => status !== "Order Created")
-                .map((status) => (
-                  <MenuItem key={status} value={status}>
-                    {status}
-                  </MenuItem>
-                ))}
+      <Dialog open={openEditDialog} onClose={handleCloseDialog} fullWidth maxWidth="xs">
+        <DialogTitle>Edit Tracking Status</DialogTitle>
+        <DialogContent>
+          <FormControl fullWidth margin="normal" variant="outlined" size="small">
+            <InputLabel>Status</InputLabel>
+            <Select value={selectedStatus} label="Status" onChange={handleStatusChange}>
+              {statusOptions.map((status) => (
+                <MenuItem key={status} value={status}>
+                  {status}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={handleCloseDialog} color="inherit" variant="outlined">
-            Batal
-          </Button>
-          <Button
-            onClick={handleSaveStatus}
-            variant="contained"
-            color="primary"
-            disabled={!selectedStatus}
-          >
-            Simpan
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button variant="contained" onClick={handleSaveStatus} disabled={!selectedStatus}>
+            Save
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </>
+
+
+
   );
 }

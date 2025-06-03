@@ -3,12 +3,16 @@ import {
     Box, Typography, Paper, Alert, Table, TableBody, TableCell, TableContainer, TableHead,
     TableRow, Button, Snackbar, Card, Grid, Divider, IconButton, TextField, InputAdornment,
     Dialog, DialogTitle, DialogContent, DialogActions, Avatar, CircularProgress,
-    MenuItem
+    MenuItem,
+    Pagination
 } from "@mui/material";
 import { Add, FilterList, Search } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllStockByOutlet, getStock } from "../../store/actions/stock";
+import { createStock, getAllStockByOutlet, getStock, updateStock } from "../../store/actions/stock";
 import { getAllListOutlets } from "../../store/actions/popup";
+
+import TableSkeletonLoader from "../../ui-component/cards/Skeleton/TableSkeletonLoader";
+
 
 export default function StockViews() {
     const dispatch = useDispatch();
@@ -31,6 +35,10 @@ export default function StockViews() {
     const [openOutletDialog, setOpenOutletDialog] = useState(false);
     const [selectedOutlet, setSelectedOutlet] = useState(null);
     const [openSnackbar, setOpenSnackbar] = useState(false);
+    const [selectedStockIndex, setSelectedStockIndex] = useState(null);
+    const [updatedStock, setUpdatedStock] = useState(0);
+    const [updateStockDialog, setUpdateStockDialog] = useState(false);
+
 
     const { user } = useSelector((state) => state.auth || {});
     const isOwner = user?.role === "owner";
@@ -62,9 +70,6 @@ export default function StockViews() {
         dispatch(getAllListOutlets());
     }, [dispatch]);
 
-    const handleChangePage = (event, newPage) => {
-        setPage(newPage);
-    };
 
     const handleCloseSnackbar = () => setOpenSnackbar(false);
     const handleOpenAddDialog = () => setOpenAddDialog(true);
@@ -75,7 +80,7 @@ export default function StockViews() {
             stock: 0,
             satuan: 'pcs',
             outletId: '',
-            createdBy: user?._id || '',
+            createdBy: user?.id || '',
             description: '',
             category: '',
             minStock: 0,
@@ -83,7 +88,7 @@ export default function StockViews() {
         });
         setSelectedOutlet(null);
     };
-    
+
 
     const handleOpenOutletDialog = () => setOpenOutletDialog(true);
     const handleCloseOutletDialog = () => setOpenOutletDialog(false);
@@ -104,7 +109,7 @@ export default function StockViews() {
 
 
     useEffect(() => {
-        if (user?._id) {
+        if (user?.id) {
             setInventoryForm((prev) => ({
                 ...prev,
                 createdBy: user.id
@@ -113,11 +118,51 @@ export default function StockViews() {
     }, [user]);
 
     const handleSubmitInventory = () => {
-        console.log("Submit form:", inventoryForm);
+
+        dispatch(createStock(inventoryForm))
         handleCloseAddDialog();
         setOpenSnackbar(true);
         // dispatch action here if needed
     };
+
+
+    console.log(`stock : ${JSON.stringify(data)}`);
+
+    const handleOpenUpdateStockDialog = (index) => {
+        setSelectedStockIndex(index);
+        setUpdatedStock(stockList[index].stock); // nilai awal
+        setUpdateStockDialog(true);
+    };
+
+    const handleCloseUpdateStockDialog = () => {
+        setUpdateStockDialog(false);
+        setSelectedStockIndex(null);
+    };
+
+
+    const handleUpdateStockSubmit = () => {
+        const selectedStock = stockList[selectedStockIndex];
+        const updatedStockInt = parseInt(updatedStock, 10);
+
+        if (isNaN(updatedStockInt)) {
+            console.error("Jumlah stok harus angka valid!");
+            return;
+        }
+
+        console.log(`selected : ${selectedStock._id} , updated stock: ${updatedStockInt}`);
+
+        dispatch(updateStock(selectedStock._id, updatedStockInt));
+
+        setUpdateStockDialog(false);
+        setSelectedStockIndex(null);
+    };
+
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+        const action = user.role != 'owner' ? dispatch(getAllStockByOutlet(page, limit, outletId)) : dispatch(getStock(page, limit))
+    }
+
+
 
     return (
         <>
@@ -159,30 +204,61 @@ export default function StockViews() {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {stockList.map((item) => (
-                                    <TableRow key={item._id}>
-                                        <TableCell>{item.name}</TableCell>
-                                        <TableCell>{item.satuan}</TableCell>
-                                        <TableCell>{item.stock}</TableCell>
-                                        <TableCell>{item.minStock}</TableCell>
-                                        <TableCell>{item.pricePerUnit}</TableCell>
-                                        <TableCell>{item.category}</TableCell>
-                                        <TableCell>{item.outletId?.name}</TableCell>
-                                        <TableCell>
-                                            <Button variant="outlined" size="small">Edit</Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                                {stockList.length === 0 && (
+                                {loading ? (
+                                    <TableSkeletonLoader cols={9} rows={5} />
+                                ) : stockList.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={8} align="center">
-                                            {loading ? <CircularProgress size={24} /> : "No data available"}
+                                        <TableCell colSpan={9} align="center">
+                                            Tidak ada data stock
                                         </TableCell>
                                     </TableRow>
+                                ) : (
+                                    <>
+                                        {stockList.map((item, index) => (
+                                            <TableRow key={item._id}>
+                                                <TableCell>{item.name}</TableCell>
+                                                <TableCell>{item.satuan}</TableCell>
+                                                <TableCell>{item.stock}</TableCell>
+                                                <TableCell>{item.minStock}</TableCell>
+                                                <TableCell>{item.pricePerUnit}</TableCell>
+                                                <TableCell>{item.category}</TableCell>
+                                                <TableCell>{item.outletId?.name || "-"}</TableCell>
+                                                <TableCell>
+                                                    <Button
+                                                        variant="outlined"
+                                                        onClick={() => handleOpenUpdateStockDialog(index)}
+                                                        size="small"
+                                                    >
+                                                        Edit Stock
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </>
                                 )}
                             </TableBody>
+
                         </Table>
                     </TableContainer>
+                    <Box display="flex" justifyContent="center" mt={2}>
+                        <Pagination
+                            count={totalPages}
+                            page={page}
+                            onChange={(_, newPage) => handleChangePage(null, newPage)}
+                            color="primary"
+                            disabled={loading}
+                            sx={{
+                                '& .MuiPaginationItem-root': {
+                                    borderRadius: '4px',
+                                    margin: '0 2px',
+                                },
+                                '& .MuiPaginationItem-root:not(.Mui-selected):not(.MuiPaginationItem-previousNext)': {
+                                    border: '1px solid',
+                                    borderColor: 'primary.main',
+                                },
+                            }}
+                        />
+                    </Box>
                 </Box>
             </Card>
 
@@ -225,7 +301,41 @@ export default function StockViews() {
                     <Box display="flex" flexDirection="column" gap={2} mt={1}>
                         <TextField name="name" label="Name" value={inventoryForm.name} onChange={handleChangeInventory} fullWidth />
                         <TextField name="stock" label="Stock" type="number" value={inventoryForm.stock} onChange={handleChangeInventory} fullWidth />
-                        <TextField name="satuan" label="Satuan" value={inventoryForm.satuan} onChange={handleChangeInventory} fullWidth />
+                        <TextField
+                            name="satuan"
+                            label="Satuan"
+                            value={inventoryForm.satuan}
+                            onChange={handleChangeInventory}
+                            fullWidth
+                            select
+                        >
+                            {[
+                                'pcs',
+                                'liter',
+                                'paket',
+                                'lembar',
+                                'kg',
+                                'meter',
+                                'box',
+                                'botol',
+                                'kaleng',
+                                'bungkus',
+                                'buah',
+                                'roll',
+                                'lusin',
+                                'rim',
+                                'karung',
+                                'sak',
+                                'set',
+                                'unit',
+                                'pasang'
+                            ].map((satuan) => (
+                                <MenuItem key={satuan} value={satuan}>
+                                    {satuan}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+
                         <TextField name="minStock" label="Min Stock" type="number" value={inventoryForm.minStock} onChange={handleChangeInventory} fullWidth />
                         <TextField name="pricePerUnit" label="Price Per Unit" type="number" value={inventoryForm.pricePerUnit} onChange={handleChangeInventory} fullWidth />
                         <TextField
@@ -277,6 +387,24 @@ export default function StockViews() {
                     <Button variant="contained" onClick={handleSubmitInventory}>Save</Button>
                 </DialogActions>
             </Dialog>
+            <Dialog open={updateStockDialog} onClose={handleCloseUpdateStockDialog} maxWidth="xs" fullWidth>
+                <DialogTitle>Update Stock</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        label="Stock"
+                        type="number"
+                        fullWidth
+                        margin="normal"
+                        value={updatedStock}
+                        onChange={(e) => setUpdatedStock(Number(e.target.value))}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseUpdateStockDialog}>Cancel</Button>
+                    <Button variant="contained" onClick={handleUpdateStockSubmit}>Update</Button>
+                </DialogActions>
+            </Dialog>
+
         </>
     );
 }

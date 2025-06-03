@@ -30,7 +30,7 @@ import {
 import Pagination from '@mui/material/Pagination';
 import { Add, DeleteOutlineOutlined, FilterList, Search } from '@mui/icons-material';
 
-import { fetchMemberByOutletId, onCreateMember, searchMember } from '../../store/actions/member';
+import { fetchAllMember, fetchMemberByOutletId, onCreateMember, searchMember } from '../../store/actions/member';
 import { getLevelColor } from '../../utils/baseFuncs';
 import TableSkeletonLoader from '../../ui-component/cards/Skeleton/TableSkeletonLoader';
 import SandLoader from '../../ui-component/SandLoader';
@@ -74,10 +74,14 @@ export default function MemberViews() {
 
   // Fetch member data on mount and page/outlet changes
   useEffect(() => {
-    if (outletId && !hasFetching) {
-      dispatch(fetchMemberByOutletId(currentPage, itemsPerPage, outletId));
+    if (!hasFetching) {
+      if (user.role != 'owner') {
+        dispatch(fetchMemberByOutletId(currentPage, itemsPerPage, outletId));
+      } else {
+        dispatch(fetchAllMember(currentPage, itemsPerPage))
+      }
     }
-  }, [dispatch, currentPage, outletId, hasFetching]);
+  }, [dispatch, currentPage, hasFetching]);
 
   // Update table data on data change
   useEffect(() => {
@@ -88,12 +92,15 @@ export default function MemberViews() {
   const handlePageChange = (event, page) => {
     setCurrentPage(page);
 
+    const action = user.role !== 'owner'
+      ? fetchMemberByOutletId(page, itemsPerPage, outletId)
+      : fetchAllMember(page, itemsPerPage);
+
     if (searchTerm.trim() !== '') {
-      dispatch(searchMember(searchTerm, page, itemsPerPage, outletId));
-    } else {
-      dispatch(fetchMemberByOutletId(page, itemsPerPage, outletId));
+      dispatch(action);
     }
   };
+
 
   // Search input handler
   const handleSearchChange = (e) => {
@@ -280,14 +287,14 @@ export default function MemberViews() {
               color="primary"
               disabled={loading}
               sx={{
-                  '& .MuiPaginationItem-root': {
-                      borderRadius: '4px',
-                      margin: '0 2px',
-                  },
-                  '& .MuiPaginationItem-root:not(.Mui-selected):not(.MuiPaginationItem-previousNext)': {
-                      border: '1px solid',
-                      borderColor: 'primary.main',
-                  },
+                '& .MuiPaginationItem-root': {
+                  borderRadius: '4px',
+                  margin: '0 2px',
+                },
+                '& .MuiPaginationItem-root:not(.Mui-selected):not(.MuiPaginationItem-previousNext)': {
+                  border: '1px solid',
+                  borderColor: 'primary.main',
+                },
               }}
             />
           </Box>

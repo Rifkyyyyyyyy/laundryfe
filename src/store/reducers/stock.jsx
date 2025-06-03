@@ -1,7 +1,13 @@
 import {
     GET_STOCK_FAILURE,
     GET_STOCK_LOADING,
-    GET_STOCK_SUCCESS
+    GET_STOCK_SUCCESS,
+    CREATE_STOCK_FAILURE,
+    CREATE_STOCK_LOADING,
+    CREATE_STOCK_SUCCESS,
+    UPDATE_STOCK_LOADING,
+    UPDATE_STOCK_SUCCESS,
+    UPDATE_STOCK_FAILURE
 } from '../actions/stock';
 
 const initialState = {
@@ -14,6 +20,8 @@ const initialState = {
 export default function stock(state = initialState, action) {
     switch (action.type) {
         case GET_STOCK_LOADING:
+        case CREATE_STOCK_LOADING:
+        case UPDATE_STOCK_LOADING:
             return {
                 ...state,
                 loading: true,
@@ -25,15 +33,39 @@ export default function stock(state = initialState, action) {
                 ...state,
                 loading: false,
                 data: action.payload,
-                hasFetching: true // Set flag hasFetching ke true setelah data berhasil diambil
+                hasFetching: true
             };
 
         case GET_STOCK_FAILURE:
+        case CREATE_STOCK_FAILURE:
+        case UPDATE_STOCK_FAILURE:
             return {
                 ...state,
                 loading: false,
                 error: action.error,
-                hasFetching: false // Set flag hasFetching ke false jika pengambilan data gagal
+                hasFetching: false
+            };
+
+        case CREATE_STOCK_SUCCESS:
+            return {
+                ...state,
+                loading: false,
+                data: {
+                    ...state.data,
+                    stock: [action.payload, ...(state.data.stock || [])]
+                }
+            };
+
+        case UPDATE_STOCK_SUCCESS:
+            return {
+                ...state,
+                loading: false,
+                data: {
+                    ...state.data,
+                    stock: (state.data.stock || []).map(item =>
+                        item._id === action.payload._id ? action.payload : item
+                    )
+                }
             };
 
         default:

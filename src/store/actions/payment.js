@@ -1,7 +1,8 @@
 import paymentService from "../../service/payment/paymentService";
 
 const {
-    getPaymentByOutlet: fetchPaymentsByOutlet // ganti nama agar tidak bentrok
+    getPaymentByOutletService ,
+    getAllPaymentsService
 } = paymentService;
 
 export const GET_PAYMENT_SUCCESS = "GET_PAYMENT_SUCCESS";
@@ -32,7 +33,7 @@ export function getAllPaymentByOutlet(page, limit, outletId) {
     return async (dispatch) => {
         dispatch(loadingData());
         try {
-            const data = await fetchPaymentsByOutlet(page, limit, outletId);
+            const data = await getPaymentByOutletService(page, limit, outletId);
 
             // Tambahkan delay (opsional, untuk simulasi loading)
             await new Promise(resolve => setTimeout(resolve, 500));
@@ -44,3 +45,22 @@ export function getAllPaymentByOutlet(page, limit, outletId) {
         }
     };
 }
+
+
+export function getAllPayment(page, limit) {
+    return async (dispatch) => {
+        dispatch(loadingData());
+        try {
+            const data = await getAllPaymentsService(page, limit);
+
+            // Tambahkan delay (opsional, untuk simulasi loading)
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            dispatch(receiveData(data));
+        } catch (error) {
+            console.log(`error : ${error}`);
+            dispatch(failedData(error.message || "Gagal mengambil data pembayaran"));
+        }
+    };
+}
+

@@ -4,7 +4,7 @@ import Client from "../../client";
 
 const getOrderByOutletService = async (page, limit, outletId) => {
     try {
-        const response = await Client.get('orders/outlet/' + outletId, {
+        const response = await Client.get('/orders/outlet/' + outletId, {
             params: {
                 page, limit
             }
@@ -28,7 +28,7 @@ const getOrderByOutletService = async (page, limit, outletId) => {
 
 const getAllOrder = async (page, limit) => {
     try {
-        const response = await Client.get('orders/outlet/' + outletId, {
+        const response = await Client.get('/orders' , {
             params: {
                 page, limit
             }
@@ -123,5 +123,6 @@ const calculateTotalOrderService = async ({
 export default {
     getOrderByOutletService,
     createOrderService ,
-    calculateTotalOrderService
+    calculateTotalOrderService ,
+    getAllOrder
 }

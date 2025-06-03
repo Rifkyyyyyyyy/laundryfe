@@ -1,13 +1,26 @@
 import stockService from "../../service/stock/stockService";
 
 const {
-    getStockByOutlet ,
-    getAllStock
+    getStockByOutlet,
+    getAllStock,
+    createStockService ,
+    updateStockService
 } = stockService
 
 export const GET_STOCK_SUCCESS = "GET_STOCK_SUCCESS";
 export const GET_STOCK_LOADING = "GET_STOCK_LOADING";
 export const GET_STOCK_FAILURE = "GET_STOCK_FAILURE";
+
+
+export const CREATE_STOCK_LOADING = 'CREATE_STOCK_LOADING';
+export const CREATE_STOCK_SUCCESS = 'CREATE_STOCK_SUCCESS';
+export const CREATE_STOCK_FAILURE = 'CREATE_STOK_FAILURE';
+
+
+export const UPDATE_STOCK_LOADING = 'UPDATE_STOCK_LOADING';
+export const UPDATE_STOCK_SUCCESS = 'UPDATE_STOCK_SUCCESS';
+export const UPDATE_STOCK_FAILURE = 'UPDATE_STOCK_FAILURE';
+
 
 
 
@@ -32,6 +45,46 @@ export function failedData(error) {
 }
 
 
+export function receiveCreateData(payload) {
+    return {
+        type: CREATE_STOCK_SUCCESS,
+        payload
+    };
+}
+
+export function loadingCreateData() {
+    return {
+        type: CREATE_STOCK_LOADING
+    };
+}
+
+export function failedCreateData(error) {
+    return {
+        type: CREATE_STOCK_FAILURE,
+        error
+    };
+}
+
+export function loadingUpdateData() {
+    return {
+        type: UPDATE_STOCK_LOADING
+    };
+}
+
+export function receiveUpdateData(payload) {
+    return {
+        type: UPDATE_STOCK_SUCCESS,
+        payload
+    };
+}
+
+export function failedUpdateData(error) {
+    return {
+        type: UPDATE_STOCK_FAILURE,
+        error
+    };
+}
+
 
 export function getAllStockByOutlet(page, limit, outletId) {
     return async (dispatch) => {
@@ -53,7 +106,7 @@ export function getStock(page, limit) {
     return async (dispatch) => {
         dispatch(loadingData());
         try {
-            const data = await getAllStock(page , limit)
+            const data = await getAllStock(page, limit)
 
             // Tambahkan delay 500ms
             await new Promise(resolve => setTimeout(resolve, 500));
@@ -63,4 +116,34 @@ export function getStock(page, limit) {
             dispatch(failedData(error.message || "Gagal mengambil data inventory"));
         }
     }
+}
+
+
+export function createStock(value) {
+    return async (dispatch) => {
+        dispatch(loadingCreateData());
+        try {
+            const data = await createStockService(value);
+            await new Promise(resolve => setTimeout(resolve, 500));
+            dispatch(receiveCreateData(data));
+
+        } catch (error) {
+            dispatch(failedCreateData(error.message || "Gagagl membuat data inventory"))
+
+        }
+    }
+}
+
+
+export function updateStock(itemId, stock) {
+    return async (dispatch) => {
+        dispatch(loadingUpdateData());
+        try {
+            const data = await updateStockService(itemId, stock);
+            await new Promise(resolve => setTimeout(resolve, 500));
+            dispatch(receiveUpdateData(data));
+        } catch (error) {
+            dispatch(failedUpdateData(error.message || "Gagal memperbarui data stock"));
+        }
+    };
 }

@@ -22,6 +22,28 @@ const getMemberByOutletId = async (page, limit, outletId) => {
   }
 };
 
+const getAllMember = async (page, limit) => {
+  try {
+    const response = await Client.get('/member', {
+      params: { page, limit },
+    });
+
+    if (response.status === 200 && response.data.status && response.data.data) {
+
+      return response.data.data;
+    }
+
+
+  } catch (error) {
+    throw new Error(
+      error.response?.data?.message ||
+      error.message ||
+      'Terjadi kesalahan saat ambil data member'
+    );
+  }
+};
+
+
 
 
 const searchMemberByOutletId = async (searchTerm, page, limit, outletId) => {
@@ -58,7 +80,7 @@ const createMember = async (userId, outletId, membershipLevel, membershipDuratio
       membershipLevel,
       membershipDuration
     });
-    
+
     const response = await Client.post(`/member`, {
       userId,
       outletId,
@@ -82,6 +104,7 @@ const createMember = async (userId, outletId, membershipLevel, membershipDuratio
 
 export default {
   getMemberByOutletId,
-  searchMemberByOutletId ,
-  createMember
+  searchMemberByOutletId,
+  createMember ,
+  getAllMember
 }
