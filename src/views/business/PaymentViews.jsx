@@ -34,20 +34,14 @@ export default function PaymentView() {
 
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
+
+        const action = user.role !== 'owner' ? getAllPaymentByOutlet(newPage, limit, outletId) : getAllPayment(newPage, limit);
+
+        dispatch(action);
+
     };
 
     // Debounce search
-    useEffect(() => {
-        const delayDebounce = setTimeout(() => {
-            if (user.role !== 'owner') {
-                dispatch(getAllPaymentByOutlet(page, limit, outletId, searchTerm));
-            } else {
-                dispatch(getAllPayment(page, limit, searchTerm));
-            }
-        }, 500);
-
-        return () => clearTimeout(delayDebounce);
-    }, [dispatch, outletId, page, limit, searchTerm, user.role]);
 
     useEffect(() => {
         if (!hasFetching) {

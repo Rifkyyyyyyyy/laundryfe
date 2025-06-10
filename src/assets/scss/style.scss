@@ -146,3 +146,11 @@
     transform: translateX(10px);
   }
 }
+
+
+@font-face {
+  font-family: 'SignFont';
+  src: url('/assets/font/sign.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}

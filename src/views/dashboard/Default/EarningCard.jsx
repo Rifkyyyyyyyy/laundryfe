@@ -24,14 +24,23 @@ import FileCopyTwoToneIcon from '@mui/icons-material/FileCopyOutlined';
 import PictureAsPdfTwoToneIcon from '@mui/icons-material/PictureAsPdfOutlined';
 import ArchiveTwoToneIcon from '@mui/icons-material/ArchiveOutlined';
 
-// Fungsi format ke IDR
+
+
 const formatIDR = (number) =>
   new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number);
+
+// Fungsi untuk generate pendapatan random antara min dan max (rupiah)
+function getRandomEarning(min = 100000, max = 1000000) {
+  return Math.floor(min + Math.random() * (max - min));
+}
 
 export default function EarningCard({ isLoading }) {
   const theme = useTheme();
 
   const [anchorEl, setAnchorEl] = React.useState(null);
+
+  // State pendapatan random yang disimpan supaya konsisten selama card aktif
+  const [earning, setEarning] = React.useState(getRandomEarning());
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -41,8 +50,11 @@ export default function EarningCard({ isLoading }) {
     setAnchorEl(null);
   };
 
-  // Dummy earning dalam rupiah
-  const earning = 500000;
+  // Kalau mau generate ulang pendapatan tiap klik ikon menu, bisa tambahkan:
+  // const handleMenuOpen = (event) => {
+  //   setAnchorEl(event.currentTarget);
+  //   setEarning(getRandomEarning());
+  // };
 
   return (
     <>

@@ -193,20 +193,16 @@ export default function OrderView() {
     setSelectedProducts([]);
   };
 
-  const handlePageChange = (event, page) => {
-
-
-    setCurrentPage(page);
-
-    const action = user.role !== 'owner'
-      ? dispatch(fetchOrderByOutletId(currentPage, itemsPerPage, outletId))
-      : dispatch(fetchOrder(currentPage, itemsPerPage))
-
-    if (searchTerm.trim() !== '') {
-      dispatch(action);
+  const handlePageChange = (event, pages) => {
+    setCurrentPage(pages);
+  
+    if (user.role !== 'owner') {
+      dispatch(fetchOrderByOutletId(pages, itemsPerPage, outletId));
+    } else {
+      dispatch(fetchOrder(pages, itemsPerPage));
     }
   };
-
+  
 
 
 

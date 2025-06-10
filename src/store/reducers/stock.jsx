@@ -7,7 +7,10 @@ import {
     CREATE_STOCK_SUCCESS,
     UPDATE_STOCK_LOADING,
     UPDATE_STOCK_SUCCESS,
-    UPDATE_STOCK_FAILURE
+    UPDATE_STOCK_FAILURE,
+    DELETE_STOCK_FAILURE,
+    DELETE_STOCK_LOADING,
+    DELETE_STOCK_SUCCESS
 } from '../actions/stock';
 
 const initialState = {
@@ -22,6 +25,7 @@ export default function stock(state = initialState, action) {
         case GET_STOCK_LOADING:
         case CREATE_STOCK_LOADING:
         case UPDATE_STOCK_LOADING:
+        case DELETE_STOCK_LOADING:
             return {
                 ...state,
                 loading: true,
@@ -39,6 +43,7 @@ export default function stock(state = initialState, action) {
         case GET_STOCK_FAILURE:
         case CREATE_STOCK_FAILURE:
         case UPDATE_STOCK_FAILURE:
+        case DELETE_STOCK_FAILURE:
             return {
                 ...state,
                 loading: false,
@@ -64,6 +69,18 @@ export default function stock(state = initialState, action) {
                     ...state.data,
                     stock: (state.data.stock || []).map(item =>
                         item._id === action.payload._id ? action.payload : item
+                    )
+                }
+            };
+
+        case DELETE_STOCK_SUCCESS:
+            return {
+                ...state,
+                loading: false,
+                data: {
+                    ...state.data,
+                    stock: (state.data.stock || []).filter(
+                        item => item._id !== action.payload
                     )
                 }
             };

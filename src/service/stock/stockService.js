@@ -45,8 +45,8 @@ const getAllStock = async (page, limit) => {
 
 const createStockService = async (data) => {
     try {
-        const response = await Client.post('/stock' , data);
-        if(response.status === '201' && response.data.status  && response.data.data) {
+        const response = await Client.post('/stock', data);
+        if (response.status === '201' && response.data.status && response.data.data) {
             return response.data.data;
         }
         throw new Error('Gagal menambahkan data inventory')
@@ -58,14 +58,14 @@ const createStockService = async (data) => {
         );
     }
 }
- 
 
-const updateStockService = async (itemId , stock) => {
+
+const updateStockService = async (itemId, stock) => {
     try {
-     
+
         const response = await Client.patch('/stock/' + itemId, { jumlah: stock });
-        
-        if(response.status === 200 && response.data.status && response.data.data) {
+
+        if (response.status === 200 && response.data.status && response.data.data) {
             return response.data.data;
         }
         throw new Error('Gagal mengupdate data inventory');
@@ -78,10 +78,29 @@ const updateStockService = async (itemId , stock) => {
     }
 };
 
+const deleteStock = async (id) => {
+    try {
+        const response = await Client.delete(`/stock/${id}`);
 
-export default  {
-    getStockByOutlet ,
-    getAllStock ,
-    createStockService ,
-    updateStockService
+        if (response.status === 200 && response.data.status && response.data.data) {
+            return response.data.data;
+        }
+
+        throw new Error('Gagal menghapus data inventory');
+    } catch (error) {
+        throw new Error(
+            error.response?.data?.message ||
+            error.message ||
+            'Terjadi kesalahan saat menghapus data inventory'
+        );
+    }
+};
+
+
+export default {
+    getStockByOutlet,
+    getAllStock,
+    createStockService,
+    updateStockService ,
+    deleteStock
 }

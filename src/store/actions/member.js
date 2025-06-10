@@ -4,7 +4,9 @@ const {
     getMemberByOutletId,
     searchMemberByOutletId,
     createMember,
-    getAllMember
+    getAllMember ,
+    searchMembers ,
+    updateMember
 } = memberService;
 
 export const GET_MEMBER_SUCCESS = "GET_MEMBER_SUCCESS";
@@ -45,6 +47,20 @@ export function createMemberLoading() {
 export function createMemberFailure(error) {
     return { type: CREATE_MEMBER_FAILURE, error };
 }
+
+
+export function updateMemberSuccess(payload) {
+    return { type: UPDATE_MEMBER_SUCCESS, payload };
+  }
+  
+  export function updateMemberLoading() {
+    return { type: UPDATE_MEMBER_LOADING };
+  }
+  
+  export function updateMemberFailure(error) {
+    return { type: UPDATE_MEMBER_FAILURE, error };
+  }
+  
 
 // Thunk for Fetching Member by Outlet ID
 export function fetchMemberByOutletId(page, limit, outletId) {
@@ -88,6 +104,19 @@ export function searchMember(searchTerm, page, limit, outletId) {
     };
 }
 
+export function searchAllMember(searchTerm, page, limit) {
+    return async (dispatch) => {
+        dispatch(loadingData());
+        try {
+            const data = await searchMembers(searchTerm , page , limit)
+            await new Promise(resolve => setTimeout(resolve, 300));
+            dispatch(receiveData(data));
+        } catch (error) {
+            dispatch(failedData(error.message || "Gagal mencari data member"));
+        }
+    };
+}
+
 // Thunk for Creating Member
 export function onCreateMember(userId, outletId, membershipLevel, membershipDuration) {
     return async (dispatch) => {
@@ -101,4 +130,18 @@ export function onCreateMember(userId, outletId, membershipLevel, membershipDura
             dispatch(createMemberFailure(error.message || "Gagal membuat member"));
         }
     };
+}
+
+export function onUpdateMember(id ,membershipLevel, membershipDuration ) {
+    return async (dispatch) => {
+       dispatch(updateMemberLoading())
+       try {
+        const data = await updateMember(id , membershipLevel , membershipDuration)
+        // delay supaya loading animasi keliatan
+        await new Promise(resolve => setTimeout(resolve, 300));
+        dispatch(updateMemberSuccess(data));
+       } catch (error) {
+        dispatch(updateMemberFailure(error.message || "Gagal update member"));
+       }
+    }
 }

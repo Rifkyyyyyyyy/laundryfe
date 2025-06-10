@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
+import { useSelector } from 'react-redux'; // jangan lupa import useSelector
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
@@ -13,8 +14,8 @@ import Box from '@mui/material/Box';
 import Chart from 'react-apexcharts';
 
 // project imports
-import ChartDataMonth from './chart-data/total-order-month-line-chart';
-import ChartDataYear from './chart-data/total-order-year-line-chart';
+import getChartDataMonth from './chart-data/total-order-month-line-chart';
+import getChartDataYear from './chart-data/total-order-year-line-chart';
 import MainCard from 'ui-component/cards/MainCard';
 import SkeletonTotalOrderCard from 'ui-component/cards/Skeleton/EarningCard';
 
@@ -22,13 +23,39 @@ import SkeletonTotalOrderCard from 'ui-component/cards/Skeleton/EarningCard';
 import LocalMallOutlinedIcon from '@mui/icons-material/LocalMallOutlined';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 
+
+function getRandomPrice() {
+  return Math.floor(100 + Math.random() * 900); // 100 - 999
+}
+
 export default function TotalOrderLineChartCard({ isLoading }) {
   const theme = useTheme();
 
+  const { user } = useSelector((state) => state.auth || {});
+  const role = user?.role || 'guest';
+  const username = user?.username || 'Kasir';
+
+  // state untuk mode waktu: true=Month, false=Year
   const [timeValue, setTimeValue] = React.useState(false);
+
+  // state harga random untuk masing-masing mode
+  const [randomPriceMonth, setRandomPriceMonth] = React.useState(getRandomPrice());
+  const [randomPriceYear, setRandomPriceYear] = React.useState(getRandomPrice());
+
+  // handler klik tombol Month/Year -> update timeValue & generate harga random baru
   const handleChangeTime = (event, newValue) => {
     setTimeValue(newValue);
+    if (newValue) {
+      setRandomPriceMonth(getRandomPrice());
+    } else {
+      setRandomPriceYear(getRandomPrice());
+    }
   };
+
+  // chart data sesuai role dan waktu
+  const chartData = timeValue
+    ? (role === 'owner' ? getChartDataMonth('All Outlets') : getChartDataMonth(username))
+    : (role === 'owner' ? getChartDataYear('All Outlets') : getChartDataYear(username));
 
   return (
     <>
@@ -43,10 +70,7 @@ export default function TotalOrderLineChartCard({ isLoading }) {
             color: '#fff',
             overflow: 'hidden',
             position: 'relative',
-            '&>div': {
-              position: 'relative',
-              zIndex: 5
-            },
+            '&>div': { position: 'relative', zIndex: 5 },
             '&:after': {
               content: '""',
               position: 'absolute',
@@ -115,11 +139,11 @@ export default function TotalOrderLineChartCard({ isLoading }) {
                   <Grid size={6}>
                     <Grid container sx={{ alignItems: 'center' }}>
                       <Grid>
-                        {timeValue ? (
-                          <Typography sx={{ fontSize: '2.125rem', fontWeight: 500, mr: 1, mt: 1.75, mb: 0.75 }}>$108</Typography>
-                        ) : (
-                          <Typography sx={{ fontSize: '2.125rem', fontWeight: 500, mr: 1, mt: 1.75, mb: 0.75 }}>$961</Typography>
-                        )}
+                        <Typography
+                          sx={{ fontSize: '2.125rem', fontWeight: 500, mr: 1, mt: 1.75, mb: 0.75 }}
+                        >
+                          {timeValue ? randomPriceMonth : randomPriceYear}
+                        </Typography>
                       </Grid>
                       <Grid>
                         <Avatar
@@ -156,7 +180,7 @@ export default function TotalOrderLineChartCard({ isLoading }) {
                       }
                     }}
                   >
-                    {timeValue ? <Chart {...ChartDataMonth} /> : <Chart {...ChartDataYear} />}
+                    <Chart {...chartData} />
                   </Grid>
                 </Grid>
               </Grid>
@@ -168,4 +192,6 @@ export default function TotalOrderLineChartCard({ isLoading }) {
   );
 }
 
-TotalOrderLineChartCard.propTypes = { isLoading: PropTypes.bool };
+TotalOrderLineChartCard.propTypes = {
+  isLoading: PropTypes.bool
+};

@@ -3,7 +3,8 @@ import cashiersServices from "../../service/cashiers/cashiersServices";
 
 const {
     getAllCashiers ,
-    deleteCashiers
+    deleteCashiers ,
+    updateCashiers
 } = cashiersServices;
 
 export const GET_CASHIERS_SUCCESS = "GET_CASHIERS_SUCCESS";
@@ -13,6 +14,12 @@ export const GET_CASHIERS_FAILURE = "GET_CASHIERS_FAILURE";
 export const DELETE_CASHIER_SUCCESS = "DELETE_CASHIER_SUCCESS";
 export const DELETE_CASHIER_LOADING = "DELETE_CASHIER_LOADING";
 export const DELETE_CASHIER_FAILURE = "DELETE_CASHIER_FAILURE";
+
+
+export const UPDATE_CASHIER_SUCCESS = "UPDATE_CASHIER_SUCCESS";
+export const UPDATE_CASHIER_LOADING = "UPDATE_CASHIER_LOADING";
+export const UPDATE_CASHIER_FAILURE = "UPDATE_CASHIER_FAILURE";
+
 
 export function deleteCashierSuccess(id) {
   return {
@@ -58,6 +65,28 @@ export function failedData(error) {
 }
 
 
+export function updateCashierSuccess(updatedData) {
+  return {
+    type: UPDATE_CASHIER_SUCCESS,
+    payload: updatedData,
+  };
+}
+
+export function updateCashierLoading() {
+  return {
+    type: UPDATE_CASHIER_LOADING,
+  };
+}
+
+export function updateCashierFailure(error) {
+  return {
+    type: UPDATE_CASHIER_FAILURE,
+    error,
+  };
+}
+
+
+
 export function deleteCashier(id) {
   return async (dispatch) => {
     dispatch(deleteCashierLoading());
@@ -92,4 +121,26 @@ export function fetchCashiers(page, limit) {
             dispatch(failedData(error.message || "Gagal mengambil data kasir"));
         }
     };
+}
+
+
+export function updateCashier(userId, value) {
+  return async (dispatch) => {
+    dispatch(updateCashierLoading());
+
+    try {
+      const updated = await updateCashiers(
+        userId,
+        value
+        
+      );
+
+      // Optional delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      dispatch(updateCashierSuccess(updated));
+    } catch (error) {
+      dispatch(updateCashierFailure(error.message || "Gagal mengupdate kasir"));
+    }
+  };
 }

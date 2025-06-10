@@ -47,6 +47,17 @@ const CardWrapper = styled(MainCard)(({ theme }) => ({
 export default function TotalIncomeDarkCard({ isLoading }) {
   const theme = useTheme();
 
+  // Generate angka random antara 100 juta sampai 999 juta (misal)
+  const randomIncome = Math.floor(Math.random() * 900_000_000) + 100_000_000;
+
+  // Format ke rupiah
+  const formattedIncome = new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(randomIncome);
+
   return (
     <>
       {isLoading ? (
@@ -77,7 +88,7 @@ export default function TotalIncomeDarkCard({ isLoading }) {
                   }}
                   primary={
                     <Typography variant="h4" sx={{ color: '#fff' }}>
-                      $203k
+                      {formattedIncome}
                     </Typography>
                   }
                   secondary={

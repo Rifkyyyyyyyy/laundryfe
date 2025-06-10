@@ -4,6 +4,7 @@ import Client from "../../client";
 
 const getOrderByOutletService = async (page, limit, outletId) => {
     try {
+      
         const response = await Client.get('/orders/outlet/' + outletId, {
             params: {
                 page, limit
@@ -11,6 +12,7 @@ const getOrderByOutletService = async (page, limit, outletId) => {
         });
 
         if (response.status === 200 && response.data.status && response.data.data) {
+        
             return response.data.data;
         }
 

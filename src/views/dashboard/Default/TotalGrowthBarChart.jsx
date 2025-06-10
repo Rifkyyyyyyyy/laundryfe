@@ -45,8 +45,13 @@ const formatIDR = (number) => {
   }).format(number);
 };
 
+// Fungsi generate angka random dalam range min-max
+const getRandomNumber = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
 export default function TotalGrowthBarChart({ isLoading }) {
   const [value, setValue] = React.useState('today');
+  const [dummyEarning, setDummyEarning] = React.useState(0);
+
   const theme = useTheme();
   const { mode } = useConfig();
 
@@ -60,22 +65,19 @@ export default function TotalGrowthBarChart({ isLoading }) {
   const secondaryMain = theme.palette.secondary.main;
   const secondaryLight = theme.palette.secondary.light;
 
+  // Update chart options on theme/mode change
   React.useEffect(() => {
     const newChartData = {
       ...chartData.options,
       colors: [primary200, primaryDark, secondaryMain, secondaryLight],
       xaxis: {
         labels: {
-          style: {
-            style: { colors: primary }
-          }
+          style: { colors: primary }
         }
       },
       yaxis: {
         labels: {
-          style: {
-            style: { colors: primary }
-          }
+          style: { colors: primary }
         }
       },
       grid: { borderColor: divider },
@@ -88,8 +90,10 @@ export default function TotalGrowthBarChart({ isLoading }) {
     }
   }, [mode, primary200, primaryDark, secondaryMain, secondaryLight, primary, darkLight, divider, isLoading, grey500]);
 
-  // Dummy data pendapatan (IDR)
-  const dummyEarning = 23240000; // Rp 23.240.000
+  // Update dummy earning setiap kali value berubah
+  React.useEffect(() => {
+    setDummyEarning(getRandomNumber(10_000_000, 50_000_000));
+  }, [value]);
 
   return (
     <>
@@ -111,7 +115,12 @@ export default function TotalGrowthBarChart({ isLoading }) {
                   </Grid>
                 </Grid>
                 <Grid>
-                  <TextField id="standard-select-currency" select value={value} onChange={(e) => setValue(e.target.value)}>
+                  <TextField
+                    id="standard-select-currency"
+                    select
+                    value={value}
+                    onChange={(e) => setValue(e.target.value)}
+                  >
                     {status.map((option) => (
                       <MenuItem key={option.value} value={option.value}>
                         {option.label}

@@ -6,9 +6,9 @@ import {
     MenuItem,
     Pagination
 } from "@mui/material";
-import { Add, FilterList, Search } from "@mui/icons-material";
+import { Add, DeleteOutlineOutlined, FilterList, Search } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
-import { createStock, getAllStockByOutlet, getStock, updateStock } from "../../store/actions/stock";
+import { createStock, deleteStockByIdThunk, getAllStockByOutlet, getStock, updateStock } from "../../store/actions/stock";
 import { getAllListOutlets } from "../../store/actions/popup";
 
 import TableSkeletonLoader from "../../ui-component/cards/Skeleton/TableSkeletonLoader";
@@ -38,6 +38,8 @@ export default function StockViews() {
     const [selectedStockIndex, setSelectedStockIndex] = useState(null);
     const [updatedStock, setUpdatedStock] = useState(0);
     const [updateStockDialog, setUpdateStockDialog] = useState(false);
+    const [openDeletedPopup, setOpenDeletePopup] = useState(false);
+    const [deleteId, setDeletedId] = useState(null);
 
 
     const { user } = useSelector((state) => state.auth || {});
@@ -145,11 +147,10 @@ export default function StockViews() {
         const updatedStockInt = parseInt(updatedStock, 10);
 
         if (isNaN(updatedStockInt)) {
-            console.error("Jumlah stok harus angka valid!");
+
             return;
         }
 
-        console.log(`selected : ${selectedStock._id} , updated stock: ${updatedStockInt}`);
 
         dispatch(updateStock(selectedStock._id, updatedStockInt));
 
@@ -160,6 +161,22 @@ export default function StockViews() {
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
         const action = user.role != 'owner' ? dispatch(getAllStockByOutlet(page, limit, outletId)) : dispatch(getStock(page, limit))
+    }
+
+
+    const deleteStock = (id) => {
+        dispatch(deleteStockByIdThunk(id))
+    }
+
+    const handleOpenDeleteDialog = (id) => {
+        setDeletedId(id)
+        setOpenDeletePopup(true);
+    }
+
+
+    const handleCloseDeletePopup = () => {
+        setDeletedId(null)
+        setOpenDeletePopup(false);
     }
 
 
@@ -198,7 +215,7 @@ export default function StockViews() {
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    {["Name", "Unit", "Stock", "Min Stock", "Price", "Category", "Outlet", "Action"].map((head) => (
+                                    {["Name", "Unit", "Stock", "Price", "Category", "Outlet", "Action"].map((head) => (
                                         <TableCell key={head} sx={{ fontWeight: 700 }}>{head}</TableCell>
                                     ))}
                                 </TableRow>
@@ -219,19 +236,26 @@ export default function StockViews() {
                                                 <TableCell>{item.name}</TableCell>
                                                 <TableCell>{item.satuan}</TableCell>
                                                 <TableCell>{item.stock}</TableCell>
-                                                <TableCell>{item.minStock}</TableCell>
+                                                {/* <TableCell>{item.minStock}</TableCell> */}
                                                 <TableCell>{item.pricePerUnit}</TableCell>
                                                 <TableCell>{item.category}</TableCell>
                                                 <TableCell>{item.outletId?.name || "-"}</TableCell>
                                                 <TableCell>
-                                                    <Button
-                                                        variant="outlined"
-                                                        onClick={() => handleOpenUpdateStockDialog(index)}
-                                                        size="small"
-                                                    >
-                                                        Edit Stock
-                                                    </Button>
+                                                    <Box display="flex" alignItems="center" gap={1}>
+                                                        <Button
+                                                            variant="outlined"
+                                                            onClick={() => handleOpenUpdateStockDialog(index)}
+                                                            size="small"
+                                                            sx={{ minWidth: 80 }} // <-- lebar tombol diatur di sini
+                                                        >
+                                                            Edit Stock
+                                                        </Button>
+                                                        <IconButton size="small" onClick={() => handleOpenDeleteDialog(item._id)} disabled={user.role != 'owner'}>
+                                                            <DeleteOutlineOutlined />
+                                                        </IconButton>
+                                                    </Box>
                                                 </TableCell>
+
                                             </TableRow>
                                         ))}
                                     </>
@@ -402,6 +426,19 @@ export default function StockViews() {
                 <DialogActions>
                     <Button onClick={handleCloseUpdateStockDialog}>Cancel</Button>
                     <Button variant="contained" onClick={handleUpdateStockSubmit}>Update</Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog open={openDeletedPopup} onClose={handleCloseDeletePopup}>
+                <DialogTitle>Delete Stock</DialogTitle>
+                <DialogContent>
+                    <Typography>Are you sure you want to delete this stock?</Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDeletePopup}>Cancel</Button>
+                    <Button color="error" >
+                        Delete
+                    </Button>
                 </DialogActions>
             </Dialog>
 

@@ -25,6 +25,25 @@ import MoreHorizOutlinedIcon from '@mui/icons-material/MoreHorizOutlined';
 import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
 import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
 
+// Data produk laundry
+const products = [
+  { name: 'Cuci Kering Biasa', price: 15000, status: 'Naik', color: 'success' },
+  { name: 'Cuci Setrika Express', price: 25000, status: 'Turun', color: 'orange' },
+  { name: 'Setrika Saja', price: 12000, status: 'Naik', color: 'success' },
+  { name: 'Cuci Bed Cover', price: 35000, status: 'Turun', color: 'orange' },
+  { name: 'Dry Clean Jas', price: 50000, status: 'Turun', color: 'orange' }
+];
+
+// Fungsi untuk mengacak array (Fisher-Yates shuffle)
+function shuffleArray(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 export default function PopularCard({ isLoading }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -35,6 +54,9 @@ export default function PopularCard({ isLoading }) {
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  // Ambil 5 produk random
+  const randomProducts = React.useMemo(() => shuffleArray(products).slice(0, 5), []);
 
   return (
     <>
@@ -80,13 +102,7 @@ export default function PopularCard({ isLoading }) {
               </Grid>
 
               {/* Daftar Produk Laundry */}
-              {[
-                { name: 'Cuci Kering Biasa', price: 15000, status: 'Naik', color: 'success' },
-                { name: 'Cuci Setrika Express', price: 25000, status: 'Turun', color: 'orange' },
-                { name: 'Setrika Saja', price: 12000, status: 'Naik', color: 'success' },
-                { name: 'Cuci Bed Cover', price: 35000, status: 'Turun', color: 'orange' },
-                { name: 'Dry Clean Jas', price: 50000, status: 'Turun', color: 'orange' }
-              ].map((item, index) => (
+              {randomProducts.map((item, index) => (
                 <React.Fragment key={index}>
                   <Grid container direction="column">
                     <Grid>

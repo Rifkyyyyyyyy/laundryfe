@@ -43,6 +43,8 @@ export default function ProductViews() {
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [openConfirm, setOpenConfirm] = useState(false);
     const [openAddDialog, setOpenAddDialog] = useState(false);
+    const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+    const [selectedUpdateProduct, setSelectedUpdateProduct] = useState(null);
     const [anchorEl, setAnchorEl] = useState(null);
     const [popperProduct, setPopperProduct] = useState(null);
 
@@ -209,6 +211,53 @@ export default function ProductViews() {
         setPopperProduct(null);
     };
 
+
+    const onOpenUpdateDialog = (product) => {
+        console.log(`data : ${JSON.stringify(product)}`);
+        setSelectedUpdateProduct(product);
+        setProductForm({
+            name: product.name || "",
+            price: formatNumberWithDot(product.price || 0),
+            unit: product.unit || "",
+            category: product.category || "",
+            outletId: product.outletId?._id || outletId,
+            image: product.photo?.url || null,
+            description: product.description || "",
+        });
+        setOpenUpdateDialog(true);
+    };
+
+
+
+    const handleSubmitUpdateProduct = () => {
+        const priceNumber = parseNumberFromString(productForm.price);
+        if (
+            !productForm.name ||
+            productForm.price === "" ||
+            priceNumber < 0 ||
+            !productForm.unit ||
+            !productForm.category
+        ) {
+            alert("Mohon lengkapi semua field wajib dan pastikan harga tidak negatif.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("name", productForm.name);
+        formData.append("price", priceNumber);
+        formData.append("unit", productForm.unit);
+        formData.append("category", productForm.category);
+        formData.append("outletId", productForm.outletId);
+        formData.append("description", productForm.description);
+        if (productForm.image && typeof productForm.image !== "string") {
+            formData.append("image", productForm.image);
+        }
+
+        dispatch(updateProduct(selectedUpdateProduct._id, formData));
+        setOpenUpdateDialog(false);
+    };
+
+
     return (
         <Box>
 
@@ -238,11 +287,20 @@ export default function ProductViews() {
                                     <Delete />
                                 </IconButton>
                             </Tooltip>
-                            <Tooltip title="Update Discount">
-                                <IconButton>
+                            <Tooltip title="Update Product">
+                                <IconButton
+                                    onClick={() => {
+                                        const selected = products.find(p => p._id === selectedProduct);
+                                        if (selected) {
+                                            onOpenUpdateDialog(selected);
+                                        }
+                                    }}
+                                    disabled={!selectedProduct}
+                                >
                                     <Edit />
                                 </IconButton>
                             </Tooltip>
+
                             <Tooltip title="Add Product">
                                 <IconButton onClick={handleOpenAddDialog} disabled={user.role === 'owner'}>
                                     <Add />
@@ -483,6 +541,91 @@ export default function ProductViews() {
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            {/* Update Product Dialog */}
+            <Dialog
+                open={openUpdateDialog}
+                onClose={() => setOpenUpdateDialog(false)}
+                fullWidth
+                maxWidth="sm"
+            >
+                <DialogTitle>Update Produk</DialogTitle>
+                <DialogContent dividers>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                            <TextField
+                                label="Nama Produk"
+                                name="name"
+                                fullWidth
+                                value={productForm.name}
+                                onChange={handleInputChange}
+                                required
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                label="Harga"
+                                name="price"
+                                fullWidth
+                                value={productForm.price}
+                                onChange={handleInputChange}
+                                required
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                label="Satuan"
+                                name="unit"
+                                fullWidth
+                                value={productForm.unit}
+                                onChange={handleInputChange}
+                                required
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                label="Kategori"
+                                name="category"
+                                fullWidth
+                                value={productForm.category}
+                                onChange={handleInputChange}
+                                required
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                label="Deskripsi"
+                                name="description"
+                                fullWidth
+                                multiline
+                                minRows={2}
+                                value={productForm.description}
+                                onChange={handleInputChange}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Button variant="outlined" component="label">
+                                Upload Gambar
+                                <input type="file" hidden onChange={handleImageChange} />
+                            </Button>
+                            {productForm.image && (
+                                <Typography variant="caption" sx={{ ml: 2 }}>
+                                    {typeof productForm.image === 'string'
+                                        ? 'Gambar sebelumnya'
+                                        : productForm.image.name}
+                                </Typography>
+                            )}
+                        </Grid>
+                    </Grid>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenUpdateDialog(false)}>Batal</Button>
+                    <Button variant="contained" onClick={handleSubmitUpdateProduct}>
+                        Simpan
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
 
             <Popper
                 open={Boolean(anchorEl && popperProduct)}

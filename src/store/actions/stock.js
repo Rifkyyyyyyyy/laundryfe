@@ -4,7 +4,8 @@ const {
     getStockByOutlet,
     getAllStock,
     createStockService ,
-    updateStockService
+    updateStockService ,
+    deleteStock
 } = stockService
 
 export const GET_STOCK_SUCCESS = "GET_STOCK_SUCCESS";
@@ -20,6 +21,11 @@ export const CREATE_STOCK_FAILURE = 'CREATE_STOK_FAILURE';
 export const UPDATE_STOCK_LOADING = 'UPDATE_STOCK_LOADING';
 export const UPDATE_STOCK_SUCCESS = 'UPDATE_STOCK_SUCCESS';
 export const UPDATE_STOCK_FAILURE = 'UPDATE_STOCK_FAILURE';
+
+
+export const DELETE_STOCK_LOADING = 'DELETE_STOCK_LOADING';
+export const DELETE_STOCK_SUCCESS = 'DELETE_STOCK_SUCCESS';
+export const DELETE_STOCK_FAILURE = 'DELETE_STOCK_FAILURE';
 
 
 
@@ -86,6 +92,28 @@ export function failedUpdateData(error) {
 }
 
 
+export function loadingDeleteData() {
+    return {
+        type: DELETE_STOCK_LOADING
+    };
+}
+
+export function receiveDeleteData(payload) {
+    return {
+        type: DELETE_STOCK_SUCCESS,
+        payload
+    };
+}
+
+export function failedDeleteData(error) {
+    return {
+        type: DELETE_STOCK_FAILURE,
+        error
+    };
+}
+
+
+
 export function getAllStockByOutlet(page, limit, outletId) {
     return async (dispatch) => {
         dispatch(loadingData());
@@ -144,6 +172,20 @@ export function updateStock(itemId, stock) {
             dispatch(receiveUpdateData(data));
         } catch (error) {
             dispatch(failedUpdateData(error.message || "Gagal memperbarui data stock"));
+        }
+    };
+}
+
+
+export function deleteStockByIdThunk(id) {
+    return async (dispatch) => {
+        dispatch(loadingDeleteData());
+        try {
+            const data = await deleteStock(id);
+            await new Promise(resolve => setTimeout(resolve, 500));
+            dispatch(receiveDeleteData(data));
+        } catch (error) {
+            dispatch(failedDeleteData(error.message || "Gagal menghapus data inventory"));
         }
     };
 }

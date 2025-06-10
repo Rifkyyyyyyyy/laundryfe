@@ -72,6 +72,31 @@ const searchMemberByOutletId = async (searchTerm, page, limit, outletId) => {
 };
 
 
+const searchMembers = async (searchTerm, page = 1, limit = 5) => {
+  try {
+    console.log(`${searchTerm} - ${page} - ${limit}`);
+    const response = await Client.get('/members/search/', {
+      params: { page, limit, searchTerm },
+    });
+
+    if (response.status === 200 && response.data?.status && response.data?.data) {
+      return response.data.data;
+    }
+
+    // Jika kondisi tidak terpenuhi, return default empty data atau throw error
+    throw new Error('Data member tidak ditemukan');
+  } catch (error) {
+    console.log(`error : ${error}`);
+    throw new Error(
+      error.response?.data?.message ||
+      error.message ||
+      'Terjadi kesalahan saat ambil data member'
+    );
+  }
+};
+
+
+
 const createMember = async (userId, outletId, membershipLevel, membershipDuration) => {
   try {
     console.log('Payload dikirim ke backend:', {
@@ -102,9 +127,36 @@ const createMember = async (userId, outletId, membershipLevel, membershipDuratio
 
 
 
+const updateMember = async (id, membershipLevel, membershipDuration) => {
+  try {
+    const response = await Client.patch('/member/' + id, {
+      membershipLevel,
+      membershipDuration
+    });
+
+
+    if (response.status === 200 && response.data.status && response.data.data) {
+      console.log(`data yang diterima : ${JSON.stringify(response.data.data)}`);
+      return response.data.data;
+    }
+
+
+  } catch (error) {
+    throw new Error(
+      error.response?.data?.message ||
+      error.message ||
+      'Terjadi kesalahan saat update member'
+    );
+  }
+};
+
+
+
 export default {
   getMemberByOutletId,
   searchMemberByOutletId,
-  createMember ,
-  getAllMember
+  createMember,
+  getAllMember,
+  searchMembers ,
+  updateMember
 }

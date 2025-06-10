@@ -19,13 +19,13 @@ export default function Footer() {
       <Typography variant="caption">
         &copy; All rights reserved{' '}
         <Typography component={Link} href="" underline="hover" target="_blank" color="secondary.main">
-          Si-Bersih
+         Rifky firmansyah - Arjuna ranma putra - Siti andiani
         </Typography>
       </Typography>
       <Stack direction="row" sx={{ gap: 1.5, alignItems: 'center', justifyContent: 'space-between' }}>
         <Link
           component={RouterLink}
-          to="https://x.com/codedthemes"
+          to="https://example.com"
           underline="hover"
           target="_blank"
           variant="caption"
@@ -35,7 +35,7 @@ export default function Footer() {
         </Link>
         <Link
           component={RouterLink}
-          to="https://discord.com/invite/p2E2WhCb6s"
+          to="https://example.com"
           underline="hover"
           target="_blank"
           variant="caption"

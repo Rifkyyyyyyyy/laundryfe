@@ -20,9 +20,16 @@ import StorefrontTwoToneIcon from '@mui/icons-material/StorefrontTwoTone';
 
 export default function Dashboard() {
   const [isLoading, setLoading] = useState(true);
+  const [randomTotal, setRandomTotal] = useState(0);
 
   useEffect(() => {
+    const generateRandomTotal = () => {
+      return Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000;
+    };
+
+    setRandomTotal(generateRandomTotal());
     setLoading(false);
+    
   }, []);
 
   return (
@@ -44,8 +51,8 @@ export default function Dashboard() {
                 <TotalIncomeLightCard
                   {...{
                     isLoading: isLoading,
-                    total: 203,
-                    label: 'Total Income',
+                    total: randomTotal,
+                    label: 'Total Outcome',
                     icon: <StorefrontTwoToneIcon fontSize="inherit" />
                   }}
                 />

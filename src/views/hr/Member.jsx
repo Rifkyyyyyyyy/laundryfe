@@ -30,7 +30,7 @@ import {
 import Pagination from '@mui/material/Pagination';
 import { Add, DeleteOutlineOutlined, FilterList, Search } from '@mui/icons-material';
 
-import { fetchAllMember, fetchMemberByOutletId, onCreateMember, searchMember } from '../../store/actions/member';
+import { fetchAllMember, fetchMemberByOutletId, onCreateMember, onUpdateMember, searchAllMember, searchMember } from '../../store/actions/member';
 import { getLevelColor } from '../../utils/baseFuncs';
 import TableSkeletonLoader from '../../ui-component/cards/Skeleton/TableSkeletonLoader';
 import SandLoader from '../../ui-component/SandLoader';
@@ -57,6 +57,56 @@ export default function MemberViews() {
   const [userIdInput, setUserIdInput] = useState('');
   const [membershipLevel, setMembershipLevel] = useState('silver');
   const [membershipDuration, setMembershipDuration] = useState(1);
+
+  const [updateDialog, setUpdateDialog] = useState(false);
+  const [deleteDialog, setDeleteDialog] = useState(false);
+  const [selectedMember, setSelectedMember] = useState(null);
+
+
+  const handleOpenDelete = (data) => {
+    setSelectedMember(data);
+    setDeleteDialog(true);
+
+  }
+
+
+  const handleCloseDelete = () => {
+    setSelectedMember(null);
+    setDeleteDialog(false);
+  }
+
+  const handleOpenUpdate = (data) => {
+    setSelectedMember(data);
+    setMembershipLevel(data.membershipLevel);
+
+    const join = new Date(data.joinDate);
+    const expired = new Date(data.expiredDate);
+
+    // Hitung selisih bulan secara kalender
+    const duration =
+      (expired.getFullYear() - join.getFullYear()) * 12 +
+      (expired.getMonth() - join.getMonth());
+
+    setMembershipDuration(duration);
+    setUpdateDialog(true);
+  };
+
+
+
+  const handleCloseUpdate = () => {
+    setSelectedMember(null);
+    setUpdateDialog(false);
+    setMembershipDuration(1);
+    setMembershipLevel('silver')
+  };
+
+  // Ini hanya contoh log, harusnya dipakai saat implement update
+  const handleUpdate = () => {
+    if (!selectedMember) return;
+    dispatch(onUpdateMember(selectedMember._id, membershipLevel, membershipDuration))
+    handleCloseUpdate();
+  };
+
 
   // Handlers for filter menu
   const handleClick = (event) => setAnchorEl(event.currentTarget);
@@ -92,37 +142,51 @@ export default function MemberViews() {
   const handlePageChange = (event, page) => {
     setCurrentPage(page);
 
-    const action = user.role !== 'owner'
-      ? fetchMemberByOutletId(page, itemsPerPage, outletId)
-      : fetchAllMember(page, itemsPerPage);
-
     if (searchTerm.trim() !== '') {
+      const action = user.role !== 'owner'
+        ? searchMemberByOutletId(outletId, searchTerm, page, itemsPerPage)
+        : searchAllMember(searchTerm, page, itemsPerPage);
+
+      dispatch(action);
+    } else {
+      const action = user.role !== 'owner'
+        ? fetchMemberByOutletId(page, itemsPerPage, outletId)
+        : fetchAllMember(page, itemsPerPage);
+
       dispatch(action);
     }
   };
 
 
+
   // Search input handler
   const handleSearchChange = (e) => {
-    const value = e.target.value;
+    const value = e.target.value.trim();
     setSearchTerm(value);
     setCurrentPage(1);
 
-    if (value.trim() !== '') {
-      dispatch(searchMember(value, 1, itemsPerPage, outletId));
+    const isSearching = value !== '';
+
+    if (user.role !== 'owner') {
+      if (isSearching) {
+        dispatch(searchMember(value, 1, itemsPerPage, outletId));
+      } else {
+        dispatch(fetchMemberByOutletId(1, itemsPerPage, outletId));
+      }
     } else {
-      dispatch(fetchMemberByOutletId(1, itemsPerPage, outletId));
+      if (isSearching) {
+        dispatch(searchAllMember(value, 1, itemsPerPage));
+      } else {
+        dispatch(fetchAllMember(1, itemsPerPage));
+      }
     }
   };
 
+
+
   // Submit Add Member form
   const handleAddMemberSubmit = () => {
-    if (!userIdInput.trim()) {
-      alert('User ID is required');
-      return;
-    }
 
-    console.log(`data : uid : ${userIdInput} outlet : ${outletId} level : ${membershipLevel} duration : ${membershipDuration}`);
     dispatch(onCreateMember(
       userIdInput,
       outletId,
@@ -249,7 +313,8 @@ export default function MemberViews() {
                         <Button
                           variant="outlined"
                           size="small"
-                          onClick={() => null}
+                          disabled={user.role != 'kasir'}
+                          onClick={() => handleOpenUpdate(member)}
                           sx={{
                             mr: 1,
                             borderColor: '#ccc',
@@ -262,7 +327,7 @@ export default function MemberViews() {
                         >
                           Edit
                         </Button>
-                        <IconButton size="small" onClick={() => null}>
+                        <IconButton size="small" onClick={() => handleOpenDelete(member)} disabled={user.role != 'kasir'}>
                           <DeleteOutlineOutlined />
                         </IconButton>
                       </Box>
@@ -348,6 +413,58 @@ export default function MemberViews() {
           <Button onClick={handleDialogClose}>Cancel</Button>
           <Button variant="contained" color="primary" onClick={handleAddMemberSubmit}>
             Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+
+      <Dialog open={updateDialog} onClose={handleCloseUpdate} maxWidth="sm" fullWidth>
+        <DialogTitle>Update Member</DialogTitle>
+        <DialogContent dividers>
+          <FormControl fullWidth margin="normal">
+            <InputLabel id="membership-level-label">Membership Level</InputLabel>
+            <Select
+              labelId="membership-level-label"
+              value={membershipLevel}
+              label="Membership Level"
+              onChange={(e) => setMembershipLevel(e.target.value)}
+            >
+              <MenuItem value="silver">Silver</MenuItem>
+              <MenuItem value="gold">Gold</MenuItem>
+              <MenuItem value="platinum">Platinum</MenuItem>
+            </Select>
+          </FormControl>
+
+          <FormControl fullWidth margin="normal">
+            <InputLabel id="membership-duration-label">Membership Duration (months)</InputLabel>
+            <Select
+              labelId="membership-duration-label"
+              value={membershipDuration}
+              label="Membership Duration (months)"
+              onChange={(e) => setMembershipDuration(Number(e.target.value))}
+            >
+              {[1, 3, 6, 12].map((duration) => (
+                <MenuItem key={duration} value={duration}>
+                  {duration}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseUpdate}>Cancel</Button>
+          <Button variant="contained" onClick={handleUpdate}>Update</Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={deleteDialog} onClose={handleCloseDelete}>
+        <DialogTitle>Delete Member</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to delete this Member?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDelete}>Cancel</Button>
+          <Button color="error" onClick={null}>
+            Delete
           </Button>
         </DialogActions>
       </Dialog>
